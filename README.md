@@ -1,29 +1,72 @@
-# graphql-pundit
+# GraphQL::Pundit
 
-Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/graphql/pundit`. To experiment with that code, run `bin/console` for an interactive prompt.
 
-TODO: Delete this and the text above, and describe your gem
 
 ## Installation
 
 Add this line to your application's Gemfile:
 
 ```ruby
-gem 'graphql-pundit'
+gem 'graphql-pundit', github: 'phyrog/graphql-pundit',
+                      branch: 'master'
 ```
 
 And then execute:
 
-    $ bundle
-
-Or install it yourself as:
-
-    $ gem install graphql-pundit
+```bash
+$ bundle
+```
 
 ## Usage
 
-TODO: Write usage instructions here
+### Add the authorization middleware
 
+Add the following to your GraphQL schema:
+
+```ruby
+MySchema = GraphQL::Schema.define do
+  ...
+  instrument(:field, GraphQL::Pundit::Instrumenter.new)
+  ...
+end
+```
+
+By default, `ctx[:current_user]` will be used as the user to authorize. To change that behavior, pass a symbol to `GraphQL::Pundit::Instrumenter`. 
+
+```ruby
+GraphQL::Pundit::Instrumenter.new(:me) # will use ctx[:me]
+```
+
+### Authorize fields
+
+For each field you want to authorize via Pundit, add the following code to the field definition:
+
+```ruby
+field :email do
+  authorize :read_email
+  resolve ...
+end
+```
+
+By default, this will use the Policy for the parent object (the first argument passed to the resolve proc), checking for `:read_email?` for the current user.
+
+Now, in some cases you'll want to use a different policy, or in case of mutations, the passed object might be `nil`:
+
+```ruby
+field :createUser
+  authorize! :create, User
+  resolve ...
+end
+```
+
+This will use the `:create?` method of the `UserPolicy`.
+
+You might have also noticed the use of `authorize!` instead of `authorize` in this example. The difference between the two is this:
+
+- `authorize` will set the field to `nil` if authorization fails
+- `authorize!` will set the field to `nil` and add an error to the response if authorization fails
+
+You would normally want to use `authorize` for fields in queries, that only e.g. the owner of something can see, while `authorize!` would be usually used in mutations, where you want to communicate to the client that the operation failed because the user is unauthorized.
 ## Development
 
 After checking out the repo, run `bin/setup` to install dependencies. Then, run `rake spec` to run the tests. You can also run `bin/console` for an interactive prompt that will allow you to experiment.
@@ -32,7 +75,7 @@ To install this gem onto your local machine, run `bundle exec rake install`. To 
 
 ## Contributing
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/[USERNAME]/graphql-pundit.
+Bug reports and pull requests are welcome on GitHub at https://github.com/phyrog/graphql-pundit.
 
 
 ## License
