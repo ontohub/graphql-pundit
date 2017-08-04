@@ -13,7 +13,7 @@ Gem::Specification.new do |spec|
 
   spec.summary       = 'Pundit authorization support for graphql'
   spec.description   = spec.summary
-  spec.homepage      = 'https://github.com/phyrog/graphql-pundit'
+  spec.homepage      = 'https://github.com/ontohub/graphql-pundit'
   spec.license       = 'MIT'
 
   spec.files         = `git ls-files -z`.split("\x0").reject do |f|
