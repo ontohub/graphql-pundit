@@ -1,5 +1,5 @@
-require_relative 'pundit/instrumenter'
-require_relative 'pundit/version'
+require 'graphql-pundit/instrumenter'
+require 'graphql-pundit/version'
 
 require 'graphql'
 

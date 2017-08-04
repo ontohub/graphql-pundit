@@ -1,5 +1,5 @@
 require "bundler/setup"
-require "graphql/pundit"
+require "graphql-pundit"
 
 RSpec.configure do |config|
   # Enable flags like --only-failures and --next-failure
