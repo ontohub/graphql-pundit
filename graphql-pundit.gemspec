@@ -8,8 +8,8 @@ require 'graphql-pundit/version'
 Gem::Specification.new do |spec|
   spec.name          = 'graphql-pundit'
   spec.version       = GraphQL::Pundit::VERSION
-  spec.authors       = ['Tom Gehrke']
-  spec.email         = ['phyrog@cognitive-coding.com']
+  spec.authors       = ['Ontohub Core Developers']
+  spec.email         = ['ontohub-dev-l@ovgu.de']
 
   spec.summary       = 'Pundit authorization support for graphql'
   spec.description   = spec.summary
