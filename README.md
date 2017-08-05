@@ -7,7 +7,7 @@
 Add this line to your application's Gemfile:
 
 ```ruby
-gem 'graphql-pundit', github: 'phyrog/graphql-pundit',
+gem 'graphql-pundit', github: 'ontohub/graphql-pundit',
                       branch: 'master'
 ```
 
@@ -75,7 +75,7 @@ To install this gem onto your local machine, run `bundle exec rake install`. To 
 
 ## Contributing
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/phyrog/graphql-pundit.
+Bug reports and pull requests are welcome on GitHub at https://github.com/ontohub/graphql-pundit.
 
 
 ## License
