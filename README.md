@@ -14,8 +14,7 @@
 Add this line to your application's Gemfile:
 
 ```ruby
-gem 'graphql-pundit', github: 'ontohub/graphql-pundit',
-                      branch: 'master'
+gem 'graphql-pundit'
 ```
 
 And then execute:
