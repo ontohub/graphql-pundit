@@ -1,0 +1,7 @@
+ShowCopNames: true
+
+fail_on_violations: false
+
+ruby:
+  enabled: true
+  config_file: .rubocop.yml
