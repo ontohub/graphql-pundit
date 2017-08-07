@@ -1,5 +1,13 @@
-sudo: false
+sudo: required
+dist: trusty
+
 language: ruby
+
 rvm:
   - 2.4.1
-before_install: gem install bundler -v 1.14.6
+
+notifications:
+  email: false
+
+script:
+  - bundle exec rake
