@@ -1,3 +1,7 @@
+# frozen_string_literal: true
+
+require_relative 'support/simplecov'
+
 require "bundler/setup"
 require "graphql-pundit"
 
