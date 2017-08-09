@@ -49,23 +49,30 @@ For each field you want to authorize via Pundit, add the following code to the f
 
 ```ruby
 field :email do
-  authorize :read_email
+  authorize # will use UserPolicy#email?
   resolve ...
 end
 ```
 
-By default, this will use the Policy for the parent object (the first argument passed to the resolve proc), checking for `:read_email?` for the current user.
+By default, this will use the Policy for the parent object (the first argument passed to the resolve proc), checking for `:email?` for the current user. Sometimes, the field name will differ from the policy method name, in which case you can specify it explicitly:
+
+```ruby
+field :email do
+  authorize :read_email # will use UserPolicy#read_email?
+  resolve ...
+end
+```
 
 Now, in some cases you'll want to use a different policy, or in case of mutations, the passed object might be `nil`:
 
 ```ruby
 field :createUser
-  authorize! :create, User
+  authorize! :create, User # or User.new; will use UserPolicy#create?
   resolve ...
 end
 ```
 
-This will use the `:create?` method of the `UserPolicy`.
+This will use the `:create?` method of the `UserPolicy`. You can also pass in objects instead of a class, if you wish to authorize the user for the specific object.
 
 You might have also noticed the use of `authorize!` instead of `authorize` in this example. The difference between the two is this:
 
