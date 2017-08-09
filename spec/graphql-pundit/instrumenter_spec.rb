@@ -26,7 +26,7 @@ RSpec.shared_examples 'an authorizing field' do |error|
   context 'Authorized' do
     subject { pass_test }
     it 'returns the value' do
-      expect(result).to eq('pass')
+      expect(result).to eq(subject.to_s)
     end
   end
 
@@ -47,19 +47,39 @@ end
 RSpec.shared_examples 'field with authorization' do |error|
   context 'with query' do
     context 'with name' do
-      let(:field) do
-        GraphQL::Field.define(type: 'String') do
-          name :test
-          if error
-            authorize! :test
-          else
-            authorize :test
+      context 'with record' do
+        let(:field) do
+          subj = subject
+          GraphQL::Field.define(type: 'String') do
+            name :notTest
+            if error
+              authorize! :test, subj
+            else
+              authorize :test, subj
+            end
+            resolve ->(obj, _args, _ctx) { obj.to_s }
           end
-          resolve ->(obj, _args, _ctx) { obj.to_s }
         end
+        let(:result) { instrumented_field.resolve(Test.new('pass'), {}, {}) }
+
+        include_examples 'an authorizing field', error
       end
 
-      include_examples 'an authorizing field', error
+      context 'without record' do
+        let(:field) do
+          GraphQL::Field.define(type: 'String') do
+            name :notTest
+            if error
+              authorize! :test
+            else
+              authorize :test
+            end
+            resolve ->(obj, _args, _ctx) { obj.to_s }
+          end
+        end
+
+        include_examples 'an authorizing field', error
+      end
     end
 
     context 'with proc' do
