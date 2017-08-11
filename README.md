@@ -73,6 +73,18 @@ You might have also noticed the use of `authorize!` instead of `authorize` in th
 - `authorize!` will set the field to `nil` and add an error to the response if authorization fails
 
 You would normally want to use `authorize` for fields in queries, that only e.g. the owner of something can see, while `authorize!` would be usually used in mutations, where you want to communicate to the client that the operation failed because the user is unauthorized.
+
+If you still need more control over how policies are called, you can pass a lambda to `authorize`:
+
+```ruby
+field :email
+  authorize ->(obj, args, ctx) { UserPolicy.new(obj, ctx[:me]).private_data?(:email) }
+  resolve ...
+end
+```
+
+If the lambda returns a falsy value or raises a `Pundit::UnauthorizedError` the field will resolve to `nil`, if it returns a truthy value, control will be passed to the resolve function. Of course, this can be used with `authorize!` as well.
+
 ## Development
 
 After checking out the repo, run `bin/setup` to install dependencies. Then, run `rake spec` to run the tests. You can also run `bin/console` for an interactive prompt that will allow you to experiment.

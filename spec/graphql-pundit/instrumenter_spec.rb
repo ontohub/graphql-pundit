@@ -1,4 +1,6 @@
-require "spec_helper"
+# frozen_string_literal: true
+
+require 'spec_helper'
 
 class Test
   def initialize(value)
@@ -16,61 +18,111 @@ class TestPolicy
   end
 
   def create?
-    @value.to_s == "pass"
+    @value.to_s == 'pass'
   end
 end
 
 RSpec.describe GraphQL::Pundit::Instrumenter do
   let(:instrumenter) { GraphQL::Pundit::Instrumenter.new }
   let(:instrumented_field) { instrumenter.instrument(nil, field) }
-  let(:fail) { Test.new(:fail) }
-  let(:pass) { Test.new(:pass) }
-  let(:result) { instrumented_field.resolve(subject, {}, {})}
+  let(:fail_test) { Test.new(:fail) }
+  let(:pass_test) { Test.new(:pass) }
+  let(:result) { instrumented_field.resolve(subject, {}, {}) }
 
   context 'authorize' do
-    let(:field) do
-      GraphQL::Field.define(type: "String") do
-        name "TestField"
-        authorize :create
-        resolve ->(obj, args, ctx) { obj.to_s }
+    context 'with symbol' do
+      let(:field) do
+        GraphQL::Field.define(type: 'String') do
+          name 'TestField'
+          authorize :create
+          resolve ->(obj, _args, _ctx) { obj.to_s }
+        end
+      end
+
+      context 'Authorized' do
+        subject { pass_test }
+        it 'returns the value' do
+          expect(result).to eq('pass')
+        end
+      end
+
+      context 'Unauthorized' do
+        subject { fail_test }
+        it 'returns nil' do
+          expect(result).to eq(nil)
+        end
       end
     end
 
-    context 'Authorized' do
-      subject { pass }
-      it 'returns the value' do
-        expect(result).to eq("pass")
+    context 'authorize!' do
+      let(:field) do
+        GraphQL::Field.define(type: 'String') do
+          name 'TestField'
+          authorize! :create
+          resolve ->(obj, _args, _ctx) { obj.to_s }
+        end
+      end
+
+      context 'Authorized' do
+        subject { pass_test }
+        it 'returns the value' do
+          expect(result).to eq('pass')
+        end
+      end
+
+      context 'Unauthorized' do
+        subject { fail_test }
+        it 'raises an execution error' do
+          expect { result }.to raise_error(GraphQL::ExecutionError)
+        end
       end
     end
 
-    context 'Unauthorized' do
-      subject { fail }
-      it 'returns nil' do
-        expect(result).to eq(nil)
+    context 'with proc' do
+      let(:field) do
+        GraphQL::Field.define(type: 'String') do
+          name 'TestField'
+          authorize ->(obj, _args, _ctx) { TestPolicy.new(nil, obj).create? }
+          resolve ->(obj, _args, _ctx) { obj.to_s }
+        end
+      end
+
+      context 'Authorized' do
+        subject { pass_test }
+        it 'returns the value' do
+          expect(result).to eq('pass')
+        end
+      end
+
+      context 'Unauthorized' do
+        subject { fail_test }
+        it 'returns nil' do
+          expect(result).to eq(nil)
+        end
       end
     end
-  end
 
-  context 'authorize!' do
-    let(:field) do
-      GraphQL::Field.define(type: "String") do
-        name "TestField"
-        authorize! :create
-        resolve ->(obj, args, ctx) { obj.to_s }
+    context 'authorize!' do
+      let(:field) do
+        GraphQL::Field.define(type: 'String') do
+          name 'TestField'
+          authorize! ->(obj, _args, _ctx) { TestPolicy.new(nil, obj).create? }
+          resolve ->(obj, _args, _ctx) { obj.to_s }
+        end
       end
-    end
 
-    context 'Authorized' do
-      subject { pass }
-      it 'returns the value' do
-        expect(result).to eq("pass")
+      context 'Authorized' do
+        subject { pass_test }
+        it 'returns the value' do
+          expect(result).to eq('pass')
+        end
       end
-    end
 
-    context 'Unauthorized' do
-      subject { fail }
-      it 'raises an execution error' do
-        expect { result }.to raise_error(GraphQL::ExecutionError)
+      context 'Unauthorized' do
+        subject { fail_test }
+        it 'raises an execution error' do
+          expect { result }.to raise_error(GraphQL::ExecutionError)
+        end
       end
     end
   end

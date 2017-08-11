@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'pundit'
 
 module GraphQL
@@ -25,12 +27,15 @@ module GraphQL
 
       def resolve_proc(current_user, old_resolve, options)
         lambda do |obj, args, ctx|
-          query = options[:query].to_s + '?'
-          record = options[:record] || obj
           begin
-            unless ::Pundit.authorize(ctx[current_user], record, query)
-              raise ::Pundit::NotAuthorizedError
-            end
+            result = if options[:proc]
+                       options[:proc].call(obj, args, ctx)
+                     else
+                       query = options[:query].to_s + '?'
+                       record = options[:record] || obj
+                       ::Pundit.authorize(ctx[current_user], record, query)
+                     end
+            raise ::Pundit::NotAuthorizedError unless result
             old_resolve.call(obj, args, ctx)
           rescue ::Pundit::NotAuthorizedError
             if options[:raise]
