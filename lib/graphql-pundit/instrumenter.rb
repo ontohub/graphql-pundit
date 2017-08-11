@@ -21,7 +21,11 @@ module GraphQL
             resolve resolve_proc
           end
         else
+          # :nocov:
+          # If no authorization metadata is set, skip and just return the
+          # original field
           field
+          # :nocov:
         end
       end
 
