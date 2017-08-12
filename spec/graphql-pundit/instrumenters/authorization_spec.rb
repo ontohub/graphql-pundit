@@ -116,7 +116,7 @@ RSpec.shared_examples 'field with authorization' do |error|
   end
 end
 
-RSpec.describe GraphQL::Pundit::Instrumenter do
+RSpec.describe GraphQL::Pundit::Instrumenters::Authorization do
   let(:instrumenter) { GraphQL::Pundit::Instrumenter.new }
   let(:instrumented_field) { instrumenter.instrument(nil, field) }
   let(:fail_test) { Test.new(:fail) }
