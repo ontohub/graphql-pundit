@@ -5,6 +5,7 @@ require 'pundit'
 module GraphQL
   module Pundit
     module Instrumenters
+      # Instrumenter that supplies `authorize`
       class Authorization
         attr_reader :current_user
 
@@ -23,16 +24,18 @@ module GraphQL
           end
         end
 
+        # rubocop:disable Metrics/MethodLength, Metrics/AbcSize
         def resolve_proc(current_user, old_resolve, options)
+          # rubocop:enable Metrics/MethodLength, Metrics/AbcSize
           lambda do |obj, args, ctx|
             begin
               result = if options[:proc]
-                        options[:proc].call(obj, args, ctx)
-                      else
-                        query = options[:query].to_s + '?'
-                        record = options[:record] || obj
-                        ::Pundit.authorize(ctx[current_user], record, query)
-                      end
+                         options[:proc].call(obj, args, ctx)
+                       else
+                         query = options[:query].to_s + '?'
+                         record = options[:record] || obj
+                         ::Pundit.authorize(ctx[current_user], record, query)
+                       end
               raise ::Pundit::NotAuthorizedError unless result
               old_resolve.call(obj, args, ctx)
             rescue ::Pundit::NotAuthorizedError

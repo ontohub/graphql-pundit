@@ -5,6 +5,7 @@ require 'pundit'
 module GraphQL
   module Pundit
     module Instrumenters
+      # Instrumenter that supplies `scope`
       class Scope
         attr_reader :current_user
 
@@ -12,7 +13,9 @@ module GraphQL
           @current_user = current_user
         end
 
+        # rubocop:disable Metrics/MethodLength, Metrics/AbcSize
         def instrument(_type, field)
+          # rubocop:enable Metrics/MethodLength, Metrics/AbcSize
           scope = field.metadata[:scope]
           return field unless scope
           unless valid_value?(scope)

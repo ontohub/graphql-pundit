@@ -6,7 +6,7 @@ require 'graphql-pundit/instrumenters/scope'
 
 module GraphQL
   module Pundit
-    # The authorization Instrumenter
+    # Intrumenter combining the authorization and scope instrumenters
     class Instrumenter
       attr_reader :current_user,
                   :authorization_instrumenter,
