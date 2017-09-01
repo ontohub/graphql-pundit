@@ -92,6 +92,26 @@ end
 
 If the lambda returns a falsy value or raises a `Pundit::UnauthorizedError` the field will resolve to `nil`, if it returns a truthy value, control will be passed to the resolve function. Of course, this can be used with `authorize!` as well.
 
+### Scopes
+
+Pundit scopes are supported by using `scope` in the field definition
+
+```ruby
+field :posts
+  scope
+  resolve ...
+end
+```
+
+By default, this will use the Scope definied in the `UserPolicy`. If you do not want to define a scope inside of the policy, you can also pass a lambda to `scope`. The return value will be passed to `resolve` as first argument.
+
+```ruby
+field :posts
+  scope ->(_root, _args, ctx) { Post.where(owner: ctx[:current_user]) }
+  resolve ->(posts, args, ctx) { ... }
+end
+```
+
 ## Development
 
 After checking out the repo, run `bin/setup` to install dependencies. Then, run `rake spec` to run the tests. You can also run `bin/console` for an interactive prompt that will allow you to experiment.
