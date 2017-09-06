@@ -1,42 +1,27 @@
 # frozen_string_literal: true
 
 require 'pundit'
+require 'graphql-pundit/instrumenters/authorization'
+require 'graphql-pundit/instrumenters/scope'
 
 module GraphQL
   module Pundit
-    # The authorization Instrumenter
+    # Intrumenter combining the authorization and scope instrumenters
     class Instrumenter
-      attr_reader :current_user
+      attr_reader :current_user,
+                  :authorization_instrumenter,
+                  :scope_instrumenter
 
       def initialize(current_user = :current_user)
         @current_user = current_user
+        @authorization_instrumenter = Instrumenters::Authorization.
+          new(current_user)
+        @scope_instrumenter = Instrumenters::Scope.new(current_user)
       end
 
-      def instrument(_type, field)
-        return field unless field.metadata[:authorize]
-
-        old_resolve = field.resolve_proc
-        resolve_proc = resolve_proc(current_user,
-                                    old_resolve,
-                                    field.metadata[:authorize])
-        field.redefine do
-          resolve resolve_proc
-        end
-      end
-
-      private
-
-      def resolve_proc(current_user, old_resolve, options)
-        lambda do |obj, args, ctx|
-          begin
-            result = authorize(current_user, obj, args, ctx, options)
-            raise ::Pundit::NotAuthorizedError unless result
-            old_resolve.call(obj, args, ctx)
-          rescue ::Pundit::NotAuthorizedError
-            error_message = "You're not authorized to do this"
-            raise GraphQL::ExecutionError, error_message if options[:raise]
-          end
-        end
+      def instrument(type, field)
+        scoped_field = scope_instrumenter.instrument(type, field)
+        authorization_instrumenter.instrument(type, scoped_field)
       end
 
       def authorize(current_user, obj, args, ctx, options)

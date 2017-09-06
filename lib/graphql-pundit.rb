@@ -19,6 +19,15 @@ module GraphQL
         call(defn, opts)
     end
   end
-  Field.accepts_definitions authorize: assign_authorize(false)
-  Field.accepts_definitions authorize!: assign_authorize(true)
+
+  def self.assign_scope
+    lambda do |defn, proc = :infer_scope|
+      Define::InstanceDefinable::AssignMetadataKey.new(:scope).
+        call(defn, proc)
+    end
+  end
+
+  Field.accepts_definitions(authorize: assign_authorize(false),
+                            authorize!: assign_authorize(true),
+                            scope: assign_scope)
 end
