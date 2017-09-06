@@ -58,7 +58,7 @@ RSpec.describe GraphQL::Pundit::Instrumenters::Scope do
       end
     end
 
-    context 'explicit scope' do
+    context 'explicit scope proc' do
       let(:field) do
         GraphQL::Field.define(type: 'String') do
           name :notTest
@@ -69,6 +69,20 @@ RSpec.describe GraphQL::Pundit::Instrumenters::Scope do
 
       it 'filters the list' do
         expect(result).to match_array([22, 48])
+      end
+    end
+
+    context 'explicit scope class' do
+      let(:field) do
+        GraphQL::Field.define(type: 'String') do
+          name :notTest
+          scope ScopeTestPolicy
+          resolve ->(obj, _args, _ctx) { obj.to_a }
+        end
+      end
+
+      it 'filters the list' do
+        expect(result).to match_array([1, 2, 3])
       end
     end
   end
@@ -89,12 +103,27 @@ RSpec.describe GraphQL::Pundit::Instrumenters::Scope do
       end
     end
 
-    context 'explicit scope' do
+    context 'explicit scope proc' do
       let(:field) do
         GraphQL::Field.define(type: 'String') do
           name :test
           authorize
           scope ->(scope, _args, _ctx) { scope.where { |e| e > 20 } }
+          resolve ->(obj, _args, _ctx) { obj.to_a }
+        end
+      end
+
+      it 'returns nil' do
+        expect(result).to eq(nil)
+      end
+    end
+
+    context 'explicit scope class' do
+      let(:field) do
+        GraphQL::Field.define(type: 'String') do
+          name :test
+          authorize
+          scope ScopeTestPolicy
           resolve ->(obj, _args, _ctx) { obj.to_a }
         end
       end
