@@ -112,6 +112,15 @@ field :posts
 end
 ```
 
+In case you only want to specify the Policy class containing the Scope explicitly, you can pass the Policy class explicitly:
+
+```ruby
+field :posts
+  scope PostablePolicy
+  resolve ...
+end
+```
+
 ## Development
 
 After checking out the repo, run `bin/setup` to install dependencies. Then, run `rake spec` to run the tests. You can also run `bin/console` for an interactive prompt that will allow you to experiment.

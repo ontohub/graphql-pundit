@@ -25,6 +25,10 @@ module GraphQL
           old_resolve = field.resolve_proc
 
           scope_proc = lambda do |obj, _args, ctx|
+            unless inferred?(scope)
+              obj.define_singleton_method(:policy_class) { scope }
+            end
+
             ::Pundit.policy_scope!(ctx[current_user], obj)
           end
           scope_proc = scope if proc?(scope)
@@ -40,7 +44,7 @@ module GraphQL
         private
 
         def valid_value?(value)
-          inferred?(value) || proc?(value)
+          value.is_a?(Class) || inferred?(value) || proc?(value)
         end
 
         def proc?(value)
