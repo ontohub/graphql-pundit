@@ -103,7 +103,7 @@ field :posts
 end
 ```
 
-By default, this will use the Scope definied in the `UserPolicy`. If you do not want to define a scope inside of the policy, you can also pass a lambda to `scope`. The return value will be passed to `resolve` as first argument.
+By default, this will use the Scope definied in the `PostPolicy`. If you do not want to define a scope inside of the policy, you can also pass a lambda to `scope`. The return value will be passed to `resolve` as first argument.
 
 ```ruby
 field :posts

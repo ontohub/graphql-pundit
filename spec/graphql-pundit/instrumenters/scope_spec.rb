@@ -54,7 +54,7 @@ RSpec.describe GraphQL::Pundit::Instrumenters::Scope do
       end
 
       it 'filters the list' do
-        expect(result.size).to eq(3)
+        expect(result).to match_array([1, 2, 3])
       end
     end
 
@@ -68,7 +68,7 @@ RSpec.describe GraphQL::Pundit::Instrumenters::Scope do
       end
 
       it 'filters the list' do
-        expect(result.size).to eq(2)
+        expect(result).to match_array([22, 48])
       end
     end
   end
