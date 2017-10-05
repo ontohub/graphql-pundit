@@ -33,8 +33,8 @@ module GraphQL
                          options[:proc].call(obj, args, ctx)
                        else
                          query = options[:query].to_s + '?'
-                         policy = options[:policy] || obj
-                         record = options[:record] || options[:policy] || obj
+                         record = options[:record] || obj
+                         policy = options[:policy] || record
                          policy = ::Pundit::PolicyFinder.new(policy).policy!
                          policy = policy.new(ctx[current_user], record)
                          policy.public_send(query)

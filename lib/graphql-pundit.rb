@@ -8,7 +8,7 @@ require 'graphql'
 # Define `authorize` and `authorize!` helpers
 module GraphQL
   def self.assign_authorize(raise_unauthorized)
-    lambda do |defn, query = nil, policy = nil, record = nil|
+    lambda do |defn, query = nil, policy: nil, record: nil|
       opts = {record: record,
               query: query || defn.name,
               policy: policy,
