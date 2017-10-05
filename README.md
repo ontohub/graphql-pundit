@@ -67,12 +67,21 @@ Now, in some cases you'll want to use a different policy, or in case of mutation
 
 ```ruby
 field :createUser
-  authorize! :create, User # or User.new; will use UserPolicy#create?
+  authorize! :create, policy: User # or User.new; will use UserPolicy#create?
   resolve ...
 end
 ```
 
-This will use the `:create?` method of the `UserPolicy`. You can also pass in objects instead of a class, if you wish to authorize the user for the specific object.
+This will use the `:create?` method of the `UserPolicy`. You can also pass in objects instead of a class (or symbol), if you wish to authorize the user for the specific object.
+
+If you want to pass a different value to the policy, you can use the keyword argument `record`:
+
+```ruby
+field :createUser
+  authorize! :create, record: User.new # or User.new; will use UserPolicy#create?
+  resolve ...
+end
+```
 
 You might have also noticed the use of `authorize!` instead of `authorize` in this example. The difference between the two is this:
 
