@@ -46,16 +46,16 @@ end
 
 RSpec.shared_examples 'field with authorization' do |error|
   context 'with query' do
-    context 'with name' do
-      context 'with record' do
+    context 'with record' do
+      context 'with policy' do
         let(:field) do
           subj = subject
           GraphQL::Field.define(type: 'String') do
             name :notTest
             if error
-              authorize! :test, subj
+              authorize! :test, policy: :test, record: subj.to_s
             else
-              authorize :test, subj
+              authorize :test, policy: :test, record: subj.to_s
             end
             resolve ->(obj, _args, _ctx) { obj.to_s }
           end
@@ -65,7 +65,43 @@ RSpec.shared_examples 'field with authorization' do |error|
         include_examples 'an authorizing field', error
       end
 
-      context 'without record' do
+      context 'without policy' do
+        let(:field) do
+          subj = subject
+          GraphQL::Field.define(type: 'String') do
+            name :notTest
+            if error
+              authorize! :test, record: subj
+            else
+              authorize :test, record: subj
+            end
+            resolve ->(obj, _args, _ctx) { obj.to_s }
+          end
+        end
+        let(:result) { instrumented_field.resolve(Test.new('pass'), {}, {}) }
+
+        include_examples 'an authorizing field', error
+      end
+    end
+
+    context 'without record' do
+      context 'with policy' do
+        let(:field) do
+          GraphQL::Field.define(type: 'String') do
+            name :notTest
+            if error
+              authorize! :test, policy: :test
+            else
+              authorize :test, policy: :test
+            end
+            resolve ->(obj, _args, _ctx) { obj.to_s }
+          end
+        end
+
+        include_examples 'an authorizing field', error
+      end
+
+      context 'without policy' do
         let(:field) do
           GraphQL::Field.define(type: 'String') do
             name :notTest
@@ -81,22 +117,22 @@ RSpec.shared_examples 'field with authorization' do |error|
         include_examples 'an authorizing field', error
       end
     end
+  end
 
-    context 'with proc' do
-      let(:field) do
-        GraphQL::Field.define(type: 'String') do
-          name :notTest
-          if error
-            authorize! ->(obj, _args, _ctx) { TestPolicy.new(nil, obj).test? }
-          else
-            authorize ->(obj, _args, _ctx) { TestPolicy.new(nil, obj).test? }
-          end
-          resolve ->(obj, _args, _ctx) { obj.to_s }
+  context 'with proc' do
+    let(:field) do
+      GraphQL::Field.define(type: 'String') do
+        name :notTest
+        if error
+          authorize! ->(obj, _args, _ctx) { TestPolicy.new(nil, obj).test? }
+        else
+          authorize ->(obj, _args, _ctx) { TestPolicy.new(nil, obj).test? }
         end
+        resolve ->(obj, _args, _ctx) { obj.to_s }
       end
-
-      include_examples 'an authorizing field', error
     end
+
+    include_examples 'an authorizing field', error
   end
 
   context 'without query' do

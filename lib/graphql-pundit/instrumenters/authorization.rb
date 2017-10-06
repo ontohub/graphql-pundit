@@ -34,9 +34,16 @@ module GraphQL
                        else
                          query = options[:query].to_s + '?'
                          record = options[:record] || obj
-                         ::Pundit.authorize(ctx[current_user], record, query)
+                         policy = options[:policy] || record
+                         policy = ::Pundit::PolicyFinder.new(policy).policy!
+                         policy = policy.new(ctx[current_user], record)
+                         policy.public_send(query)
                        end
-              raise ::Pundit::NotAuthorizedError unless result
+              unless result
+                raise ::Pundit::NotAuthorizedError, query: query,
+                                                    record: record,
+                                                    policy: policy
+              end
               old_resolve.call(obj, args, ctx)
             rescue ::Pundit::NotAuthorizedError
               if options[:raise]
