@@ -4,6 +4,7 @@ require_relative 'support/simplecov'
 
 require 'bundler/setup'
 require 'graphql-pundit'
+require 'fuubar'
 
 RSpec.configure do |config|
   # Enable flags like --only-failures and --next-failure
@@ -12,4 +13,8 @@ RSpec.configure do |config|
   config.expect_with :rspec do |c|
     c.syntax = :expect
   end
+
+  config.fuubar_progress_bar_options = {format: '[%B] %c/%C',
+                                        progress_mark: '#',
+                                        remainder_mark: '-'}
 end

@@ -26,11 +26,12 @@ Gem::Specification.new do |spec|
   spec.add_dependency 'graphql', '>= 1.6.4', '< 1.8.0'
   spec.add_dependency 'pundit', '~> 1.1.0'
 
-  spec.add_development_dependency 'pry', '~> 0.11.0'
   spec.add_development_dependency 'bundler', '~> 1.14'
+  spec.add_development_dependency 'codecov', '~> 0.1.10'
+  spec.add_development_dependency 'fuubar', '~> 2.2.0'
+  spec.add_development_dependency 'pry', '~> 0.11.0'
   spec.add_development_dependency 'rake', '~> 12.0'
   spec.add_development_dependency 'rspec', '~> 3.6'
   spec.add_development_dependency 'rubocop', '~> 0.51.0'
   spec.add_development_dependency 'simplecov', '~> 0.15.1'
-  spec.add_development_dependency 'codecov', '~> 0.1.10'
 end

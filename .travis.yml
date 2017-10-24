@@ -12,4 +12,4 @@ notifications:
   email: false
 
 script:
-  - bundle exec rake
+  - bundle exec rspec --format progress
