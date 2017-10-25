@@ -83,6 +83,8 @@ field :createUser
 end
 ```
 
+You can also pass a `lambda` as a record. This receives the usual three arguments (parent value, arguments, context) and returns the value to be used as a record.
+
 You might have also noticed the use of `authorize!` instead of `authorize` in this example. The difference between the two is this:
 
 - `authorize` will set the field to `nil` if authorization fails
