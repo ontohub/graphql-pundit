@@ -16,13 +16,11 @@ AllCops:
   TargetRubyVersion: 2.4
   # Include common Ruby source files.
   Include:
-    - '**/*.gemspec'
     - '**/*.podspec'
     - '**/*.jbuilder'
     - '**/*.rake'
     - '**/*.opal'
     - '**/config.ru'
-    - '**/Gemfile'
     - '**/Rakefile'
     - '**/Capfile'
     - '**/Guardfile'
@@ -35,6 +33,8 @@ AllCops:
     - '**/Fastfile'
     - '**/*Fastfile'
   Exclude:
+    - '**/*.gemspec'
+    - '**/Gemfile'
     - 'bin/bundle'
     - 'bin/rails'
     - 'bin/rake'

@@ -25,8 +25,10 @@ module GraphQL
         end
 
         # rubocop:disable Metrics/MethodLength, Metrics/AbcSize
+        # rubocop:disable Metrics/CyclomaticComplexity
+        # rubocop:disable Metrics/PerceivedComplexity
+        # rubocop:disable Metrics/BlockLength
         def resolve_proc(current_user, old_resolve, options)
-          # rubocop:enable Metrics/MethodLength, Metrics/AbcSize
           lambda do |obj, args, ctx|
             begin
               result = if options[:proc]

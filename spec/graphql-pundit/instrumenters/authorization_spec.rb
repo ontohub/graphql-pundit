@@ -100,7 +100,7 @@ RSpec.shared_examples 'field with authorization' do |error|
             end
           end
           let(:result) do
-            instrumented_field.resolve(Test.new('pass'), {}, {subject: subject})
+            instrumented_field.resolve(Test.new('pass'), {}, subject: subject)
           end
 
           include_examples 'an authorizing field', error
@@ -120,7 +120,7 @@ RSpec.shared_examples 'field with authorization' do |error|
             end
           end
           let(:result) do
-            instrumented_field.resolve(Test.new('pass'), {}, {subject: subject})
+            instrumented_field.resolve(Test.new('pass'), {}, subject: subject)
           end
 
           include_examples 'an authorizing field', error
