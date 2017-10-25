@@ -471,17 +471,6 @@ Style/EmptyMethod:
     - compact
     - expanded
 
-# Checks whether the source file has a utf-8 encoding comment or not
-# AutoCorrectEncodingComment must match the regex
-# /#.*coding\s?[:=]\s?(?:UTF|utf)-8/
-Style/Encoding:
-  EnforcedStyle: never
-  SupportedStyles:
-    - when_needed
-    - always
-    - never
-  AutoCorrectEncodingComment: '# encoding: utf-8'
-
 Layout/EndOfLine:
   # The `native` style means that CR+LF (Carriage Return + Line Feed) is
   # enforced on Windows, and LF is enforced on other platforms. The other styles
@@ -500,7 +489,7 @@ Layout/ExtraSpacing:
   # When true, forces the alignment of `=` in assignments on consecutive lines.
   ForceEqualSignAlignment: false
 
-Style/FileName:
+Naming/FileName:
   # File names listed in `AllCops:Include` are excluded by default. Add extra
   # excludes here.
   Exclude: ['lib/graphql-pundit.rb']
@@ -731,7 +720,7 @@ Style/MethodDefParentheses:
     - require_no_parentheses
     - require_no_parentheses_except_multiline
 
-Style/MethodName:
+Naming/MethodName:
   EnforcedStyle: snake_case
   SupportedStyles:
     - snake_case
@@ -902,7 +891,7 @@ Style/PercentQLiterals:
     - lower_case_q # Use `%q` when possible, `%Q` when necessary
     - upper_case_q # Always use `%Q`
 
-Style/PredicateName:
+Naming/PredicateName:
   # Predicate name prefixes.
   NamePrefix:
     - is_
@@ -1169,13 +1158,13 @@ Style/TrivialAccessors:
     - to_s
     - to_sym
 
-Style/VariableName:
+Naming/VariableName:
   EnforcedStyle: snake_case
   SupportedStyles:
     - snake_case
     - camelCase
 
-Style/VariableNumber:
+Naming/VariableNumber:
   EnforcedStyle: normalcase
   SupportedStyles:
     - snake_case
