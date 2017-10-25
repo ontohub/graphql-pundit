@@ -47,40 +47,84 @@ end
 RSpec.shared_examples 'field with authorization' do |error|
   context 'with query' do
     context 'with record' do
-      context 'with policy' do
-        let(:field) do
-          subj = subject
-          GraphQL::Field.define(type: 'String') do
-            name :notTest
-            if error
-              authorize! :test, policy: :test, record: subj.to_s
-            else
-              authorize :test, policy: :test, record: subj.to_s
+      context 'direct record' do
+        context 'with policy' do
+          let(:field) do
+            record = subject.to_s
+            GraphQL::Field.define(type: 'String') do
+              name :notTest
+              if error
+                authorize! :test, policy: :test, record: record
+              else
+                authorize :test, policy: :test, record: record
+              end
+              resolve ->(obj, _args, _ctx) { obj.to_s }
             end
-            resolve ->(obj, _args, _ctx) { obj.to_s }
           end
-        end
-        let(:result) { instrumented_field.resolve(Test.new('pass'), {}, {}) }
+          let(:result) { instrumented_field.resolve(Test.new('pass'), {}, {}) }
 
-        include_examples 'an authorizing field', error
+          include_examples 'an authorizing field', error
+        end
+
+        context 'without policy' do
+          let(:field) do
+            record = subject
+            GraphQL::Field.define(type: 'String') do
+              name :notTest
+              if error
+                authorize! :test, record: record
+              else
+                authorize :test, record: record
+              end
+              resolve ->(obj, _args, _ctx) { obj.to_s }
+            end
+          end
+          let(:result) { instrumented_field.resolve(Test.new('pass'), {}, {}) }
+
+          include_examples 'an authorizing field', error
+        end
       end
 
-      context 'without policy' do
-        let(:field) do
-          subj = subject
-          GraphQL::Field.define(type: 'String') do
-            name :notTest
-            if error
-              authorize! :test, record: subj
-            else
-              authorize :test, record: subj
+      context 'lambda record' do
+        context 'with policy' do
+          let(:field) do
+            record = ->(_obj, _arguments, ctx) { ctx[:subject].to_s }
+            GraphQL::Field.define(type: 'String') do
+              name :notTest
+              if error
+                authorize! :test, policy: :test, record: record
+              else
+                authorize :test, policy: :test, record: record
+              end
+              resolve ->(obj, _args, _ctx) { obj.to_s }
             end
-            resolve ->(obj, _args, _ctx) { obj.to_s }
           end
-        end
-        let(:result) { instrumented_field.resolve(Test.new('pass'), {}, {}) }
+          let(:result) do
+            instrumented_field.resolve(Test.new('pass'), {}, {subject: subject})
+          end
 
-        include_examples 'an authorizing field', error
+          include_examples 'an authorizing field', error
+        end
+
+        context 'without policy' do
+          let(:field) do
+            record = ->(_obj, _arguments, ctx) { ctx[:subject] }
+            GraphQL::Field.define(type: 'String') do
+              name :notTest
+              if error
+                authorize! :test, record: record
+              else
+                authorize :test, record: record
+              end
+              resolve ->(obj, _args, _ctx) { obj.to_s }
+            end
+          end
+          let(:result) do
+            instrumented_field.resolve(Test.new('pass'), {}, {subject: subject})
+          end
+
+          include_examples 'an authorizing field', error
+        end
       end
     end
 
