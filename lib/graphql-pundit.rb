@@ -7,7 +7,9 @@ require 'graphql'
 
 # Define `authorize` and `authorize!` helpers
 module GraphQL
+  # rubocop:disable Metrics/MethodLength
   def self.assign_authorize(raise_unauthorized)
+    # rubocop:enable Metrics/MethodLength
     lambda do |defn, query = nil, policy: nil, record: nil|
       opts = {record: record,
               query: query || defn.name,

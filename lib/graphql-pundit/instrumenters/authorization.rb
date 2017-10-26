@@ -25,15 +25,21 @@ module GraphQL
         end
 
         # rubocop:disable Metrics/MethodLength, Metrics/AbcSize
+        # rubocop:disable Metrics/CyclomaticComplexity
+        # rubocop:disable Metrics/PerceivedComplexity
+        # rubocop:disable Metrics/BlockLength
         def resolve_proc(current_user, old_resolve, options)
-          # rubocop:enable Metrics/MethodLength, Metrics/AbcSize
           lambda do |obj, args, ctx|
             begin
               result = if options[:proc]
                          options[:proc].call(obj, args, ctx)
                        else
                          query = options[:query].to_s + '?'
-                         record = options[:record] || obj
+                         record = if options[:record].respond_to?(:call)
+                                    options[:record].call(obj, args, ctx)
+                                  else
+                                    options[:record] || obj
+                                  end
                          policy = options[:policy] || record
                          policy = ::Pundit::PolicyFinder.new(policy).policy!
                          policy = policy.new(ctx[current_user], record)
