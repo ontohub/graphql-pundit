@@ -7,6 +7,55 @@ module GraphQL
     module Instrumenters
       # Instrumenter that supplies `authorize`
       class Authorization
+        # This does the actual Pundit authorization
+        class AuthorizationResolver
+          attr_reader :current_user, :old_resolver, :options
+          def initialize(current_user, old_resolver, options)
+            @current_user = current_user
+            @old_resolver = old_resolver
+            @options = options
+          end
+
+          def call(root, arguments, context)
+            unless authorize(root, arguments, context)
+              raise ::Pundit::NotAuthorizedError
+            end
+            old_resolver.call(root, arguments, context)
+          rescue ::Pundit::NotAuthorizedError
+            if options[:raise]
+              raise GraphQL::ExecutionError, "You're not authorized to do this"
+            end
+          end
+
+          private
+
+          def authorize(root, arguments, context)
+            if options[:proc]
+              options[:proc].call(root, arguments, context)
+            else
+              record = record(root, arguments, context)
+              ::Pundit::PolicyFinder.new(policy(record)).policy!.
+                new(context[current_user], record).public_send(query)
+            end
+          end
+
+          def query
+            @query ||= options[:query].to_s + '?'
+          end
+
+          def policy(record)
+            options[:policy] || record
+          end
+
+          def record(root, arguments, context)
+            if options[:record].respond_to?(:call)
+              options[:record].call(root, arguments, context)
+            else
+              options[:record] || root
+            end
+          end
+        end
+
         attr_reader :current_user
 
         def initialize(current_user = :current_user)
@@ -15,48 +64,12 @@ module GraphQL
 
         def instrument(_type, field)
           return field unless field.metadata[:authorize]
-          old_resolve = field.resolve_proc
-          resolve_proc = resolve_proc(current_user,
-                                      old_resolve,
-                                      field.metadata[:authorize])
+          old_resolver = field.resolve_proc
+          resolver = AuthorizationResolver.new(current_user,
+                                               old_resolver,
+                                               field.metadata[:authorize])
           field.redefine do
-            resolve resolve_proc
-          end
-        end
-
-        # rubocop:disable Metrics/MethodLength, Metrics/AbcSize
-        # rubocop:disable Metrics/CyclomaticComplexity
-        # rubocop:disable Metrics/PerceivedComplexity
-        # rubocop:disable Metrics/BlockLength
-        def resolve_proc(current_user, old_resolve, options)
-          lambda do |obj, args, ctx|
-            begin
-              result = if options[:proc]
-                         options[:proc].call(obj, args, ctx)
-                       else
-                         query = options[:query].to_s + '?'
-                         record = if options[:record].respond_to?(:call)
-                                    options[:record].call(obj, args, ctx)
-                                  else
-                                    options[:record] || obj
-                                  end
-                         policy = options[:policy] || record
-                         policy = ::Pundit::PolicyFinder.new(policy).policy!
-                         policy = policy.new(ctx[current_user], record)
-                         policy.public_send(query)
-                       end
-              unless result
-                raise ::Pundit::NotAuthorizedError, query: query,
-                                                    record: record,
-                                                    policy: policy
-              end
-              old_resolve.call(obj, args, ctx)
-            rescue ::Pundit::NotAuthorizedError
-              if options[:raise]
-                raise GraphQL::ExecutionError,
-                      "You're not authorized to do this"
-              end
-            end
+            resolve resolver
           end
         end
       end
