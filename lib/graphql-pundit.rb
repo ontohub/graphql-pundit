@@ -5,12 +5,17 @@ require 'graphql-pundit/version'
 
 require 'graphql'
 
-# Define `authorize` and `authorize!` helpers
+# Defines authorization related helpers
 module GraphQL
-  # rubocop:disable Metrics/MethodLength
-  def self.assign_authorize(raise_unauthorized)
-    # rubocop:enable Metrics/MethodLength
-    lambda do |defn, query = nil, policy: nil, record: nil|
+  # Defines `authorize` and `authorize!` helpers
+  class AuthorizationHelper
+    attr_reader :raise_unauthorized
+
+    def initialize(raise_unauthorized)
+      @raise_unauthorized = raise_unauthorized
+    end
+
+    def call(defn, query = nil, policy: nil, record: nil)
       opts = {record: record,
               query: query || defn.name,
               policy: policy,
@@ -23,14 +28,15 @@ module GraphQL
     end
   end
 
-  def self.assign_scope
-    lambda do |defn, proc = :infer_scope|
+  # Defines `scope` helper
+  class ScopeHelper
+    def call(defn, proc = :infer_scope)
       Define::InstanceDefinable::AssignMetadataKey.new(:scope).
         call(defn, proc)
     end
   end
 
-  Field.accepts_definitions(authorize: assign_authorize(false),
-                            authorize!: assign_authorize(true),
-                            scope: assign_scope)
+  Field.accepts_definitions(authorize: AuthorizationHelper.new(false),
+                            authorize!: AuthorizationHelper.new(true),
+                            scope: ScopeHelper.new)
 end
