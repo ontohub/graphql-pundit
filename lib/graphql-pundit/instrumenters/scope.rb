@@ -33,11 +33,21 @@ module GraphQL
             return scope if proc?(scope)
 
             lambda do |root, _arguments, context|
-              unless inferred?(scope)
-                root.define_singleton_method(:policy_class) { scope }
-              end
+              scope = find_scope(root, scope)
+              scope.new(context[current_user], root).resolve
+            end
+          end
 
-              ::Pundit.policy_scope!(context[current_user], root)
+          def find_scope(root, scope)
+            if !inferred?(scope)
+              scope::Scope
+            else
+              infer_from = if root.respond_to?(:model)
+                             root.model
+                           else
+                             root
+                           end
+              ::Pundit::PolicyFinder.new(infer_from).scope!
             end
           end
 
