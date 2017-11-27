@@ -19,11 +19,12 @@ module GraphQL
               raise ArgumentError, 'Invalid value passed to `scope`'
             end
 
-            @scope = new_scope(scope)
+            @scope = scope
           end
 
           def call(root, arguments, context)
-            new_scope = scope.call(root, arguments, context)
+            scope_proc = new_scope(scope)
+            new_scope = scope_proc.call(root, arguments, context)
             old_resolver.call(new_scope, arguments, context)
           end
 
@@ -33,11 +34,23 @@ module GraphQL
             return scope if proc?(scope)
 
             lambda do |root, _arguments, context|
-              unless inferred?(scope)
-                root.define_singleton_method(:policy_class) { scope }
-              end
+              scope = find_scope(root, scope)
+              scope.new(context[current_user], root).resolve
+            end
+          end
 
-              ::Pundit.policy_scope!(context[current_user], root)
+          def find_scope(root, scope)
+            if !inferred?(scope)
+              scope::Scope
+            else
+              # Special case for Sequel datasets that do not respond to
+              # ActiveModel's model_name
+              infer_from = if root.respond_to?(:model)
+                             root.model
+                           else
+                             root
+                           end
+              ::Pundit::PolicyFinder.new(infer_from).scope!
             end
           end
 

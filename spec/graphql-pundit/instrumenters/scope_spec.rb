@@ -16,6 +16,12 @@ class ScopeTest
   end
 end
 
+class ScopeTestDataset < ScopeTest
+  def model
+    ScopeTest
+  end
+end
+
 class ScopeTestPolicy
   class Scope
     attr_reader :scope
@@ -55,6 +61,21 @@ RSpec.describe GraphQL::Pundit::Instrumenters::Scope do
 
       it 'filters the list' do
         expect(result).to match_array([1, 2, 3])
+      end
+
+      context 'scope from model' do
+        subject { ScopeTestDataset.new([1, 2, 3, 22, 48]) }
+        let(:field) do
+          GraphQL::Field.define(type: 'String') do
+            name :notTest
+            scope
+            resolve ->(obj, _args, _ctx) { obj.to_a }
+          end
+        end
+
+        it 'filters the list' do
+          expect(result).to match_array([1, 2, 3])
+        end
       end
     end
 
@@ -100,6 +121,22 @@ RSpec.describe GraphQL::Pundit::Instrumenters::Scope do
 
       it 'returns nil' do
         expect(result).to eq(nil)
+      end
+
+      context 'scope from model' do
+        subject { ScopeTestDataset.new([1, 2, 3, 22, 48]) }
+        let(:field) do
+          GraphQL::Field.define(type: 'String') do
+            name :test
+            authorize policy: :scope_test
+            scope
+            resolve ->(obj, _args, _ctx) { obj.to_a }
+          end
+        end
+
+        it 'returns nil' do
+          expect(result).to eq(nil)
+        end
       end
     end
 
