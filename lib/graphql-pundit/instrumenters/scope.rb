@@ -43,6 +43,8 @@ module GraphQL
             if !inferred?(scope)
               scope::Scope
             else
+              # Special case for Sequel datasets that do not respond to
+              # ActiveModel's model_name
               infer_from = if root.respond_to?(:model)
                              root.model
                            else
