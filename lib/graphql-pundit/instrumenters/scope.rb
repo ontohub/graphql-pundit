@@ -19,11 +19,12 @@ module GraphQL
               raise ArgumentError, 'Invalid value passed to `scope`'
             end
 
-            @scope = new_scope(scope)
+            @scope = scope
           end
 
           def call(root, arguments, context)
-            new_scope = scope.call(root, arguments, context)
+            scope_proc = new_scope(scope)
+            new_scope = scope_proc.call(root, arguments, context)
             old_resolver.call(new_scope, arguments, context)
           end
 
