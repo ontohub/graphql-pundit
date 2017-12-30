@@ -4,9 +4,9 @@ dist: trusty
 language: ruby
 
 rvm:
-  - 2.2.7
-  - 2.3.5
-  - 2.4.2
+  - 2.2.9
+  - 2.3.6
+  - 2.4.3
   - 2.5.0
 
 notifications:
@@ -15,7 +15,7 @@ notifications:
 matrix:
   fast_finish: true
   allow_failures:
-    - rvm: 2.5.0
+    - rvm: 2.2.9
 
 script:
   - bundle exec rspec --format progress
