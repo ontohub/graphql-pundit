@@ -2,7 +2,6 @@
 [![Build Status](https://travis-ci.org/ontohub/graphql-pundit.svg?branch=master)](https://travis-ci.org/ontohub/graphql-pundit)
 [![Coverage Status](https://codecov.io/gh/ontohub/graphql-pundit/branch/master/graph/badge.svg)](https://codecov.io/gh/ontohub/graphql-pundit)
 [![Code Climate](https://codeclimate.com/github/ontohub/graphql-pundit/badges/gpa.svg)](https://codeclimate.com/github/ontohub/graphql-pundit)
-[![Dependency Status](https://gemnasium.com/badges/github.com/ontohub/graphql-pundit.svg)](https://gemnasium.com/github.com/ontohub/graphql-pundit)
 [![GitHub issues](https://img.shields.io/github/issues/ontohub/graphql-pundit.svg?maxAge=2592000)](https://waffle.io/ontohub/ontohub-backend?source=ontohub%2Fgraphql-pundit)
 
 # GraphQL::Pundit
