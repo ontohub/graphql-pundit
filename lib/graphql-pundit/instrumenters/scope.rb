@@ -23,9 +23,9 @@ module GraphQL
           end
 
           def call(root, arguments, context)
+            resolver_result = old_resolver.call(root, arguments, context)
             scope_proc = new_scope(scope)
-            new_scope = scope_proc.call(root, arguments, context)
-            old_resolver.call(new_scope, arguments, context)
+            scope_proc.call(resolver_result, arguments, context)
           end
 
           private

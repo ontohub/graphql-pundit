@@ -5,6 +5,7 @@ require_relative 'support/simplecov'
 require 'bundler/setup'
 require 'graphql-pundit'
 require 'fuubar'
+require 'pry'
 
 RSpec.configure do |config|
   # Enable flags like --only-failures and --next-failure

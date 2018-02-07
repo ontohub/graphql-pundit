@@ -2,27 +2,72 @@
 
 require 'spec_helper'
 
-class ScopeTest
-  def initialize(value)
-    @value = value
+class User
+  attr_reader :name, :posts
+
+  def initialize(name, posts)
+    @name = name
+    @posts = posts
+  end
+end
+
+class Post
+  attr_reader :title, :text, :author, :published
+
+  def initialize(title, text, author, published = true)
+    @title = title
+    @text = text
+    @author = author
+    @published = published
+  end
+end
+
+class PostDataset
+  attr_reader :values
+
+  def initialize(values)
+    @values = values
   end
 
-  def where(&block)
-    ScopeTest.new(@value.select(&block))
+  def model
+    Post
   end
 
   def to_a
-    @value
+    values
+  end
+
+  def map(&block)
+    values.map(&block)
+  end
+
+  def where(&block)
+    PostDataset.new(values.select(&block))
+  end
+
+  def select(&block)
+    where(&block)
   end
 end
 
-class ScopeTestDataset < ScopeTest
-  def model
-    ScopeTest
+class UserPolicy
+  attr_reader :current_user, :user
+
+  def initialize(current_user, user)
+    @current_user = current_user
+    @user = user
+  end
+
+  def posts?
+    false
+  end
+
+  def last_post?
+    false
   end
 end
 
-class ScopeTestPolicy
+class PostPolicy
   class Scope
     attr_reader :scope
 
@@ -31,14 +76,12 @@ class ScopeTestPolicy
     end
 
     def resolve
-      scope.where { |e| e.to_i < 20 }
+      if scope.respond_to?(:select)
+        scope.select { |post| post.published }
+      else
+        scope
+      end
     end
-  end
-
-  def initialize(_, _); end
-
-  def test?
-    nil
   end
 end
 
@@ -47,90 +90,87 @@ RSpec.describe GraphQL::Pundit::Instrumenters::Scope do
   let(:instrumented_field) { instrumenter.instrument(nil, field) }
   let(:result) { instrumented_field.resolve(subject, {}, {}) }
 
-  subject { ScopeTest.new([1, 2, 3, 22, 48]) }
+  subject do
+    User.new("Ada", [
+      Post.new("First Post", "This is the first post", "ada"),
+      Post.new("Second Post", "This is the second post", "ada", false)
+    ])
+  end
 
   context 'without authorization' do
     context 'inferred scope' do
-      let(:field) do
-        GraphQL::Field.define(type: 'String') do
-          name :notTest
-          scope
-          resolve ->(obj, _args, _ctx) { obj.to_a }
-        end
-      end
-
-      it 'filters the list' do
-        expect(result).to match_array([1, 2, 3])
+      subject do
+        User.new("Ada", PostDataset.new([
+          Post.new("First Post", "This is the first post", "ada"),
+          Post.new("Second Post", "This is the second post", "ada", false)
+        ]))
       end
 
       context 'scope from model' do
-        subject { ScopeTestDataset.new([1, 2, 3, 22, 48]) }
         let(:field) do
-          GraphQL::Field.define(type: 'String') do
-            name :notTest
+          GraphQL::Field.define(type: '[Post!]') do
+            name :posts
             scope
-            resolve ->(obj, _args, _ctx) { obj.to_a }
           end
         end
 
         it 'filters the list' do
-          expect(result).to match_array([1, 2, 3])
+          expect(result.map { |post| post.published }).to match_array([true])
+        end
+      end
+
+      context 'scope from other' do
+        let(:field) do
+          GraphQL::Field.define(type: 'Post') do
+            name :last_post
+            scope
+            resolve ->(user, _args, _ctx) { user.posts.to_a.last }
+          end
+        end
+
+        it 'filters the list' do
+          expect(result.published).to be_falsy
         end
       end
     end
 
     context 'explicit scope proc' do
       let(:field) do
-        GraphQL::Field.define(type: 'String') do
-          name :notTest
-          scope ->(scope, _args, _ctx) { scope.where { |e| e > 20 } }
-          resolve ->(obj, _args, _ctx) { obj.to_a }
+        GraphQL::Field.define(type: '[Post!]') do
+          name :unpublished_posts
+          property :posts
+          scope ->(posts, _args, _ctx) { posts.select { |p| !p.published } }
         end
       end
 
       it 'filters the list' do
-        expect(result).to match_array([22, 48])
+        expect(result.map { |post| post.published }).to match_array([false])
       end
     end
 
     context 'explicit scope class' do
       let(:field) do
-        GraphQL::Field.define(type: 'String') do
-          name :notTest
-          scope ScopeTestPolicy
-          resolve ->(obj, _args, _ctx) { obj.to_a }
+        GraphQL::Field.define(type: '[Post!]') do
+          name :published_posts
+          property :posts
+          scope PostPolicy
         end
       end
 
       it 'filters the list' do
-        expect(result).to match_array([1, 2, 3])
+        expect(result.map { |post| post.published }).to match_array([true])
       end
     end
   end
 
   context 'with authorization' do
     context 'inferred scope' do
-      let(:field) do
-        GraphQL::Field.define(type: 'String') do
-          name :test
-          authorize
-          scope
-          resolve ->(obj, _args, _ctx) { obj.to_a }
-        end
-      end
-
-      it 'returns nil' do
-        expect(result).to eq(nil)
-      end
-
       context 'scope from model' do
-        subject { ScopeTestDataset.new([1, 2, 3, 22, 48]) }
         let(:field) do
-          GraphQL::Field.define(type: 'String') do
-            name :test
-            authorize policy: :scope_test
+          GraphQL::Field.define(type: '[Post!]') do
+            name :posts
+            authorize
             scope
-            resolve ->(obj, _args, _ctx) { obj.to_a }
           end
         end
 
@@ -138,15 +178,29 @@ RSpec.describe GraphQL::Pundit::Instrumenters::Scope do
           expect(result).to eq(nil)
         end
       end
+
+      context 'scope from other' do
+        let(:field) do
+          GraphQL::Field.define(type: 'Post') do
+            name :last_post
+            authorize
+            scope
+            resolve ->(user, _args, _ctx) { user.posts.to_a.last }
+          end
+        end
+
+        it 'filters the list' do
+          expect(result).to eq(nil)
+        end
+      end
     end
 
     context 'explicit scope proc' do
       let(:field) do
-        GraphQL::Field.define(type: 'String') do
-          name :test
+        GraphQL::Field.define(type: '[Post!]') do
+          name :posts
           authorize
-          scope ->(scope, _args, _ctx) { scope.where { |e| e > 20 } }
-          resolve ->(obj, _args, _ctx) { obj.to_a }
+          scope ->(posts, _args, _ctx) { posts.select { |post| post.published } }
         end
       end
 
@@ -157,11 +211,10 @@ RSpec.describe GraphQL::Pundit::Instrumenters::Scope do
 
     context 'explicit scope class' do
       let(:field) do
-        GraphQL::Field.define(type: 'String') do
-          name :test
+        GraphQL::Field.define(type: '[Post!]') do
+          name :posts
           authorize
-          scope ScopeTestPolicy
-          resolve ->(obj, _args, _ctx) { obj.to_a }
+          scope PostPolicy
         end
       end
 
@@ -173,11 +226,10 @@ RSpec.describe GraphQL::Pundit::Instrumenters::Scope do
 
   context 'invalid scope argument' do
     let(:field) do
-      GraphQL::Field.define(type: 'String') do
-        name :test
+      GraphQL::Field.define(type: '[Post!]') do
+        name :posts
         authorize
         scope 'invalid value'
-        resolve ->(obj, _args, _ctx) { obj.to_a }
       end
     end
 
