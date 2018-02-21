@@ -1,0 +1,7 @@
+linters:
+  rubocop:
+    fixer: true
+  shellcheck:
+    shell: bash
+fixers:
+  enable: true
