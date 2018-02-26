@@ -77,7 +77,7 @@ class PostPolicy
 
     def resolve
       if scope.respond_to?(:select)
-        scope.select { |post| post.published }
+        scope.select(&:published)
       else
         scope
       end
@@ -91,19 +91,22 @@ RSpec.describe GraphQL::Pundit::Instrumenters::AfterScope do
   let(:result) { instrumented_field.resolve(subject, {}, {}) }
 
   subject do
-    User.new("Ada", [
-      Post.new("First Post", "This is the first post", "ada"),
-      Post.new("Second Post", "This is the second post", "ada", false)
-    ])
+    User.new('Ada', [
+               Post.new('First Post', 'This is the first post', 'ada'),
+               Post.new('Second Post', 'This is the second post', 'ada', false),
+             ])
   end
 
   context 'without authorization' do
     context 'inferred scope' do
       subject do
-        User.new("Ada", PostDataset.new([
-          Post.new("First Post", "This is the first post", "ada"),
-          Post.new("Second Post", "This is the second post", "ada", false)
-        ]))
+        dataset = PostDataset.new(
+          [
+            Post.new('First Post', 'This is the first post', 'ada'),
+            Post.new('Second Post', 'This is the second post', 'ada', false),
+          ]
+        )
+        User.new('Ada', dataset)
       end
 
       context 'scope from model' do
@@ -139,7 +142,7 @@ RSpec.describe GraphQL::Pundit::Instrumenters::AfterScope do
         GraphQL::Field.define(type: '[Post!]') do
           name :unpublished_posts
           property :posts
-          after_scope ->(posts, _args, _ctx) { posts.select { |p| !p.published } }
+          after_scope ->(posts, _args, _ctx) { posts.reject(&:published) }
         end
       end
 
@@ -200,7 +203,7 @@ RSpec.describe GraphQL::Pundit::Instrumenters::AfterScope do
         GraphQL::Field.define(type: '[Post!]') do
           name :posts
           authorize
-          after_scope ->(posts, _args, _ctx) { posts.select { |post| post.published } }
+          after_scope ->(posts, _args, _ctx) { posts.select(&:published) }
         end
       end
 

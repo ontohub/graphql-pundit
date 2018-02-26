@@ -68,13 +68,18 @@ module GraphQL
           @current_user = current_user
         end
 
+        # rubocop:disable Metrics/MethodLength
         def instrument(_type, field)
+          # rubocop:enable Metrics/MethodLength
           scope_metadata = field.metadata[self.class::SCOPE_KEY]
           return field unless scope_metadata
           scope = scope_metadata[:proc]
 
           old_resolver = field.resolve_proc
-          resolver = self.class::ScopeResolver.new(current_user, scope, old_resolver, field)
+          resolver = self.class::ScopeResolver.new(current_user,
+                                                   scope,
+                                                   old_resolver,
+                                                   field)
 
           field.redefine do
             resolve resolver
