@@ -115,7 +115,7 @@ RSpec.describe GraphQL::Pundit::Instrumenters::AfterScope do
         end
 
         it 'filters the list' do
-          expect(result.map { |post| post.published }).to match_array([true])
+          expect(result.map(&:published)).to match_array([true])
         end
       end
 
@@ -144,7 +144,7 @@ RSpec.describe GraphQL::Pundit::Instrumenters::AfterScope do
       end
 
       it 'filters the list' do
-        expect(result.map { |post| post.published }).to match_array([false])
+        expect(result.map(&:published)).to match_array([false])
       end
     end
 
@@ -158,7 +158,7 @@ RSpec.describe GraphQL::Pundit::Instrumenters::AfterScope do
       end
 
       it 'filters the list' do
-        expect(result.map { |post| post.published }).to match_array([true])
+        expect(result.map(&:published)).to match_array([true])
       end
     end
   end

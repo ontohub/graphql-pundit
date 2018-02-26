@@ -8,7 +8,6 @@ module GraphQL
     module Instrumenters
       # Instrumenter that supplies `after_scope`
       class AfterScope < Scope
-
         SCOPE_KEY = :after_scope
 
         # Applies the scoping to the passed object

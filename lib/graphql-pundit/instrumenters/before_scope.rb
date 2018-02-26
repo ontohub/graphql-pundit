@@ -8,14 +8,13 @@ module GraphQL
     module Instrumenters
       # Instrumenter that supplies `before_scope`
       class BeforeScope < Scope
-
         SCOPE_KEY = :before_scope
 
         # Applies the scoping to the passed object
         class ScopeResolver < ScopeResolver
           def call(root, arguments, context)
             if field.metadata[:before_scope][:deprecated]
-              warn <<~DEPRECATION_WARNING
+              Kernel.warn <<~DEPRECATION_WARNING
                 Using `scope` is deprecated and might be removed in the future.
                 Please use `before_scope` or `after_scope` instead.
               DEPRECATION_WARNING

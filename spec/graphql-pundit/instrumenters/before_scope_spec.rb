@@ -59,10 +59,8 @@ RSpec.describe GraphQL::Pundit::Instrumenters::BeforeScope do
     end
 
     it 'still works' do
-      verbose = $VERBOSE
-      $VERBOSE = nil
+      allow(Kernel).to receive(:warn)
       expect(result).to match_array([1, 2, 3])
-      $VERBOSE = verbose
     end
 
     it 'outputs a deprecation warning' do
