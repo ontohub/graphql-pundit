@@ -49,6 +49,31 @@ RSpec.describe GraphQL::Pundit::Instrumenters::BeforeScope do
 
   subject { ScopeTest.new([1, 2, 3, 22, 48]) }
 
+  context 'the deprecated `scope` alias' do
+    let(:field) do
+      GraphQL::Field.define(type: 'String') do
+        name :notTest
+        scope
+        resolve ->(obj, _args, _ctx) { obj.to_a }
+      end
+    end
+
+    it 'still works' do
+      verbose = $VERBOSE
+      $VERBOSE = nil
+      expect(result).to match_array([1, 2, 3])
+      $VERBOSE = verbose
+    end
+
+    it 'outputs a deprecation warning' do
+      message = <<~DEPRECATION_WARNING
+        Using `scope` is deprecated and might be removed in the future.
+        Please use `before_scope` or `after_scope` instead.
+      DEPRECATION_WARNING
+      expect { result }.to output(message).to_stderr
+    end
+  end
+
   context 'without authorization' do
     context 'inferred scope' do
       let(:field) do
