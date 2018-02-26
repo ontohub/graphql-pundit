@@ -5,11 +5,11 @@ require 'pundit'
 module GraphQL
   module Pundit
     module Instrumenters
-      # Instrumenter that supplies `scope`
+      # Base instrumenter for `before_scope` and `after_scope`
       class Scope
         # Applies the scoping to the passed object
         class ScopeResolver
-          attr_reader :current_user, :scope, :old_resolver
+          attr_reader :current_user, :scope, :old_resolver, :field
 
           def initialize(current_user, scope, old_resolver, field)
             @current_user = current_user

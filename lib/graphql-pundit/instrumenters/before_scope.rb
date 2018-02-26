@@ -6,7 +6,7 @@ require_relative 'scope'
 module GraphQL
   module Pundit
     module Instrumenters
-      # Instrumenter that supplies `scope`
+      # Instrumenter that supplies `before_scope`
       class BeforeScope < Scope
 
         SCOPE_KEY = :before_scope
@@ -14,7 +14,7 @@ module GraphQL
         # Applies the scoping to the passed object
         class ScopeResolver < ScopeResolver
           def call(root, arguments, context)
-            if @field.metadata[:before_scope][:deprecated]
+            if field.metadata[:before_scope][:deprecated]
               warn <<~DEPRECATION_WARNING
                 Using `scope` is deprecated and might be removed in the future.
                 Please use `before_scope` or `after_scope` instead.

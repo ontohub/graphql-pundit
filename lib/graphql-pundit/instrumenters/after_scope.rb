@@ -6,7 +6,7 @@ require_relative 'scope'
 module GraphQL
   module Pundit
     module Instrumenters
-      # Instrumenter that supplies `scope`
+      # Instrumenter that supplies `after_scope`
       class AfterScope < Scope
 
         SCOPE_KEY = :after_scope

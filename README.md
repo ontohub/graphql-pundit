@@ -104,25 +104,23 @@ If the lambda returns a falsy value or raises a `Pundit::UnauthorizedError` the 
 
 ### Scopes
 
-Pundit scopes are supported by using `scope` in the field definition
+Pundit scopes are supported by using `before_scope` and `after_scope` in the field definition
 
 ```ruby
 field :posts
-  scope
+  after_scope
   resolve ...
 end
 ```
 
-By default, this will use the Scope definied in the `PostPolicy`. If you do not want to define a scope inside of the policy, you can also pass a lambda to `scope`. The return value will be passed to `resolve` as first argument.
+Passing no arguments to `after_scope` and `before_scope` will infer the policy to use from the value it is passed: `before_scope` is run before `resolve` and will receive the parent object, `after_scope` will be run after `resolve` and receives the output of `resolve`. You can also pass a proc or a policy class to both `_scope`s:
 
 ```ruby
 field :posts
-  scope ->(_root, _args, ctx) { Post.where(owner: ctx[:current_user]) }
+  before_scope ->(_root, _args, ctx) { Post.where(owner: ctx[:current_user]) }
   resolve ->(posts, args, ctx) { ... }
 end
 ```
-
-In case you only want to specify the Policy class containing the Scope explicitly, you can pass the Policy class explicitly:
 
 ```ruby
 field :posts
