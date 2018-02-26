@@ -85,7 +85,7 @@ class PostPolicy
   end
 end
 
-RSpec.describe GraphQL::Pundit::Instrumenters::Scope do
+RSpec.describe GraphQL::Pundit::Instrumenters::AfterScope do
   let(:instrumenter) { GraphQL::Pundit::Instrumenter.new }
   let(:instrumented_field) { instrumenter.instrument(nil, field) }
   let(:result) { instrumented_field.resolve(subject, {}, {}) }
@@ -110,7 +110,7 @@ RSpec.describe GraphQL::Pundit::Instrumenters::Scope do
         let(:field) do
           GraphQL::Field.define(type: '[Post!]') do
             name :posts
-            scope
+            after_scope
           end
         end
 
@@ -123,7 +123,7 @@ RSpec.describe GraphQL::Pundit::Instrumenters::Scope do
         let(:field) do
           GraphQL::Field.define(type: 'Post') do
             name :last_post
-            scope
+            after_scope
             resolve ->(user, _args, _ctx) { user.posts.to_a.last }
           end
         end
@@ -139,7 +139,7 @@ RSpec.describe GraphQL::Pundit::Instrumenters::Scope do
         GraphQL::Field.define(type: '[Post!]') do
           name :unpublished_posts
           property :posts
-          scope ->(posts, _args, _ctx) { posts.select { |p| !p.published } }
+          after_scope ->(posts, _args, _ctx) { posts.select { |p| !p.published } }
         end
       end
 
@@ -153,7 +153,7 @@ RSpec.describe GraphQL::Pundit::Instrumenters::Scope do
         GraphQL::Field.define(type: '[Post!]') do
           name :published_posts
           property :posts
-          scope PostPolicy
+          after_scope PostPolicy
         end
       end
 
@@ -170,7 +170,7 @@ RSpec.describe GraphQL::Pundit::Instrumenters::Scope do
           GraphQL::Field.define(type: '[Post!]') do
             name :posts
             authorize
-            scope
+            after_scope
           end
         end
 
@@ -184,7 +184,7 @@ RSpec.describe GraphQL::Pundit::Instrumenters::Scope do
           GraphQL::Field.define(type: 'Post') do
             name :last_post
             authorize
-            scope
+            after_scope
             resolve ->(user, _args, _ctx) { user.posts.to_a.last }
           end
         end
@@ -200,7 +200,7 @@ RSpec.describe GraphQL::Pundit::Instrumenters::Scope do
         GraphQL::Field.define(type: '[Post!]') do
           name :posts
           authorize
-          scope ->(posts, _args, _ctx) { posts.select { |post| post.published } }
+          after_scope ->(posts, _args, _ctx) { posts.select { |post| post.published } }
         end
       end
 
@@ -214,7 +214,7 @@ RSpec.describe GraphQL::Pundit::Instrumenters::Scope do
         GraphQL::Field.define(type: '[Post!]') do
           name :posts
           authorize
-          scope PostPolicy
+          after_scope PostPolicy
         end
       end
 
@@ -229,7 +229,7 @@ RSpec.describe GraphQL::Pundit::Instrumenters::Scope do
       GraphQL::Field.define(type: '[Post!]') do
         name :posts
         authorize
-        scope 'invalid value'
+        after_scope 'invalid value'
       end
     end
 

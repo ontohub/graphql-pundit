@@ -30,13 +30,22 @@ module GraphQL
 
   # Defines `scope` helper
   class ScopeHelper
+    def initialize(before_or_after, deprecated: false)
+      @before_or_after = before_or_after
+      @deprecated = deprecated
+    end
+
     def call(defn, proc = :infer_scope)
-      Define::InstanceDefinable::AssignMetadataKey.new(:scope).
-        call(defn, proc)
+      opts = {proc: proc, deprecated: @deprecated}
+      Define::InstanceDefinable::AssignMetadataKey.
+        new(:"#{@before_or_after}_scope").
+        call(defn, opts)
     end
   end
 
   Field.accepts_definitions(authorize: AuthorizationHelper.new(false),
                             authorize!: AuthorizationHelper.new(true),
-                            scope: ScopeHelper.new)
+                            after_scope: ScopeHelper.new(:after),
+                            before_scope: ScopeHelper.new(:before),
+                            scope: ScopeHelper.new(:before, deprecated: true))
 end
