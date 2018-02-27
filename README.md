@@ -124,7 +124,7 @@ end
 
 ```ruby
 field :posts
-  scope PostablePolicy
+  after_scope PostablePolicy
   resolve ...
 end
 ```
