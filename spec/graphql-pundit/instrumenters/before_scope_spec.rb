@@ -42,19 +42,42 @@ class ScopeTestPolicy
   end
 end
 
-RSpec.describe GraphQL::Pundit::Instrumenters::Scope do
+RSpec.describe GraphQL::Pundit::Instrumenters::BeforeScope do
   let(:instrumenter) { GraphQL::Pundit::Instrumenter.new }
   let(:instrumented_field) { instrumenter.instrument(nil, field) }
   let(:result) { instrumented_field.resolve(subject, {}, {}) }
 
   subject { ScopeTest.new([1, 2, 3, 22, 48]) }
 
+  context 'the deprecated `scope` alias' do
+    let(:field) do
+      GraphQL::Field.define(type: 'String') do
+        name :notTest
+        scope
+        resolve ->(obj, _args, _ctx) { obj.to_a }
+      end
+    end
+
+    it 'still works' do
+      allow(Kernel).to receive(:warn)
+      expect(result).to match_array([1, 2, 3])
+    end
+
+    it 'outputs a deprecation warning' do
+      message = <<~DEPRECATION_WARNING
+        Using `scope` is deprecated and might be removed in the future.
+        Please use `before_scope` or `after_scope` instead.
+      DEPRECATION_WARNING
+      expect { result }.to output(message).to_stderr
+    end
+  end
+
   context 'without authorization' do
     context 'inferred scope' do
       let(:field) do
         GraphQL::Field.define(type: 'String') do
           name :notTest
-          scope
+          before_scope
           resolve ->(obj, _args, _ctx) { obj.to_a }
         end
       end
@@ -68,7 +91,7 @@ RSpec.describe GraphQL::Pundit::Instrumenters::Scope do
         let(:field) do
           GraphQL::Field.define(type: 'String') do
             name :notTest
-            scope
+            before_scope
             resolve ->(obj, _args, _ctx) { obj.to_a }
           end
         end
@@ -83,7 +106,7 @@ RSpec.describe GraphQL::Pundit::Instrumenters::Scope do
       let(:field) do
         GraphQL::Field.define(type: 'String') do
           name :notTest
-          scope ->(scope, _args, _ctx) { scope.where { |e| e > 20 } }
+          before_scope ->(scope, _args, _ctx) { scope.where { |e| e > 20 } }
           resolve ->(obj, _args, _ctx) { obj.to_a }
         end
       end
@@ -97,7 +120,7 @@ RSpec.describe GraphQL::Pundit::Instrumenters::Scope do
       let(:field) do
         GraphQL::Field.define(type: 'String') do
           name :notTest
-          scope ScopeTestPolicy
+          before_scope ScopeTestPolicy
           resolve ->(obj, _args, _ctx) { obj.to_a }
         end
       end
@@ -114,7 +137,7 @@ RSpec.describe GraphQL::Pundit::Instrumenters::Scope do
         GraphQL::Field.define(type: 'String') do
           name :test
           authorize
-          scope
+          before_scope
           resolve ->(obj, _args, _ctx) { obj.to_a }
         end
       end
@@ -129,7 +152,7 @@ RSpec.describe GraphQL::Pundit::Instrumenters::Scope do
           GraphQL::Field.define(type: 'String') do
             name :test
             authorize policy: :scope_test
-            scope
+            before_scope
             resolve ->(obj, _args, _ctx) { obj.to_a }
           end
         end
@@ -145,7 +168,7 @@ RSpec.describe GraphQL::Pundit::Instrumenters::Scope do
         GraphQL::Field.define(type: 'String') do
           name :test
           authorize
-          scope ->(scope, _args, _ctx) { scope.where { |e| e > 20 } }
+          before_scope ->(scope, _args, _ctx) { scope.where { |e| e > 20 } }
           resolve ->(obj, _args, _ctx) { obj.to_a }
         end
       end
@@ -160,7 +183,7 @@ RSpec.describe GraphQL::Pundit::Instrumenters::Scope do
         GraphQL::Field.define(type: 'String') do
           name :test
           authorize
-          scope ScopeTestPolicy
+          before_scope ScopeTestPolicy
           resolve ->(obj, _args, _ctx) { obj.to_a }
         end
       end
@@ -176,7 +199,7 @@ RSpec.describe GraphQL::Pundit::Instrumenters::Scope do
       GraphQL::Field.define(type: 'String') do
         name :test
         authorize
-        scope 'invalid value'
+        before_scope 'invalid value'
         resolve ->(obj, _args, _ctx) { obj.to_a }
       end
     end

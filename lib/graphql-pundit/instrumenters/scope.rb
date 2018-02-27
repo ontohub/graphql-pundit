@@ -5,27 +5,22 @@ require 'pundit'
 module GraphQL
   module Pundit
     module Instrumenters
-      # Instrumenter that supplies `scope`
+      # Base instrumenter for `before_scope` and `after_scope`
       class Scope
         # Applies the scoping to the passed object
         class ScopeResolver
-          attr_reader :current_user, :scope, :old_resolver
+          attr_reader :current_user, :scope, :old_resolver, :field
 
-          def initialize(current_user, scope, old_resolver)
+          def initialize(current_user, scope, old_resolver, field)
             @current_user = current_user
             @old_resolver = old_resolver
+            @field = field
 
             unless valid_value?(scope)
               raise ArgumentError, 'Invalid value passed to `scope`'
             end
 
             @scope = scope
-          end
-
-          def call(root, arguments, context)
-            scope_proc = new_scope(scope)
-            new_scope = scope_proc.call(root, arguments, context)
-            old_resolver.call(new_scope, arguments, context)
           end
 
           private
@@ -73,12 +68,18 @@ module GraphQL
           @current_user = current_user
         end
 
+        # rubocop:disable Metrics/MethodLength
         def instrument(_type, field)
-          scope = field.metadata[:scope]
-          return field unless scope
+          # rubocop:enable Metrics/MethodLength
+          scope_metadata = field.metadata[self.class::SCOPE_KEY]
+          return field unless scope_metadata
+          scope = scope_metadata[:proc]
 
           old_resolver = field.resolve_proc
-          resolver = ScopeResolver.new(current_user, scope, old_resolver)
+          resolver = self.class::ScopeResolver.new(current_user,
+                                                   scope,
+                                                   old_resolver,
+                                                   field)
 
           field.redefine do
             resolve resolver
