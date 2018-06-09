@@ -35,7 +35,7 @@ module GraphQL::Pundit
                      end
         scope = ::Pundit::PolicyFinder.new(infer_from).policy!()
       end
-      scope::Scope.new(context[:current_user], root).resolve
+      scope::Scope.new(context[self.class.current_user], root).resolve
     end
   end
 end

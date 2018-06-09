@@ -1,7 +1,17 @@
-require 'graphql-pundit/instrumenters/authorization'
-
 module GraphQL::Pundit
   module Authorization
+    module ClassMethods
+      def current_user(current_user = nil)
+        return self.class_variable_get(:@@current_user) unless current_user
+        self.class_variable_set(:@@current_user, current_user)
+      end
+    end
+
+    def self.prepended(base)
+      @@current_user = :current_user
+      base.extend(ClassMethods)
+    end
+
     # rubocop:disable Metrics/ParameterLists
     def initialize(*args, authorize: nil,
                           record: nil,
@@ -17,15 +27,15 @@ module GraphQL::Pundit
       super(*args, **kwargs, &block)
     end
 
-    def authorize(query = true, record:, policy:)
-      @authorize = query
+    def authorize(*args, record: nil, policy: nil)
+      @authorize = args[0] || true
       @record = record if record
       @policy = policy if policy
     end
 
-    def authorize!(query = true, record:, policy:)
+    def authorize!(*args, record: nil, policy: nil)
       @do_raise = true
-      authorize(query, record: record, policy: policy)
+      authorize(*args, record: record, policy: policy)
     end
 
     def resolve_field(obj, args, ctx)
@@ -59,7 +69,7 @@ module GraphQL::Pundit
       elsif @policy.equal?(nil)
         @policy = ::Pundit::PolicyFinder.new(@record).policy!
       end
-      @policy.new(context[:current_user], @record).public_send(query)
+      @policy.new(context[self.class.current_user], @record).public_send(query)
     end
 
     def callable?(thing)
