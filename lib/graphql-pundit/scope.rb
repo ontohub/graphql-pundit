@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module GraphQL::Pundit
   module Scope
     def initialize(*args, before_scope: nil, after_scope: nil, **kwargs, &block)
@@ -7,11 +9,11 @@ module GraphQL::Pundit
     end
 
     def before_scope(scope = true)
-      @before_scope = scope 
+      @before_scope = scope
     end
 
     def after_scope(scope = true)
-      @after_scope = scope 
+      @after_scope = scope
     end
 
     def resolve_field(obj, args, ctx)
@@ -24,16 +26,15 @@ module GraphQL::Pundit
 
     def apply_scope(scope, root, arguments, context)
       return root unless scope
-      case
-      when scope.respond_to?(:call)
+      if scope.respond_to?(:call)
         return scope.call(root, arguments, context)
-      when scope.equal?(true)
+      elsif scope.equal?(true)
         infer_from = if root.respond_to?(:model)
                        root.model
                      else
                        root
                      end
-        scope = ::Pundit::PolicyFinder.new(infer_from).policy!()
+        scope = ::Pundit::PolicyFinder.new(infer_from).policy!
       end
       scope::Scope.new(context[self.class.current_user], root).resolve
     end

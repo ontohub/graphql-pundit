@@ -1,9 +1,11 @@
+# frozen_string_literal: true
+
 module GraphQL::Pundit
   module Authorization
     module ClassMethods
       def current_user(current_user = nil)
-        return self.class_variable_get(:@@current_user) unless current_user
-        self.class_variable_set(:@@current_user, current_user)
+        return class_variable_get(:@@current_user) unless current_user
+        class_variable_set(:@@current_user, current_user)
       end
     end
 

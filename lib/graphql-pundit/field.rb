@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'graphql'
 require 'graphql-pundit/authorization'
 require 'graphql-pundit/scope'
