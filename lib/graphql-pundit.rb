@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 require 'graphql-pundit/instrumenter'
+require 'graphql-pundit/field'
+require 'graphql-pundit/authorization'
 require 'graphql-pundit/version'
 
 require 'graphql'

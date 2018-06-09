@@ -19,3 +19,41 @@ RSpec.configure do |config|
                                         progress_mark: '#',
                                         remainder_mark: '-'}
 end
+
+class Test
+  def initialize(value)
+    @value = value
+  end
+
+  def to_s
+    @value.to_s
+  end
+end
+
+class TestPolicy
+  def initialize(_, value)
+    @value = value
+  end
+
+  def test?
+    @value.to_s == 'pass'
+  end
+
+  def to_s?
+    @value.to_s == 'pass'
+  end
+end
+
+class AlternativeTestPolicy
+  def initialize(_, value)
+    @value = value
+  end
+
+  def test?
+    @value.to_s == 'pass'
+  end
+
+  def to_s?
+    @value.to_s == 'pass'
+  end
+end
