@@ -18,9 +18,10 @@ module GraphQL
       @raise_unauthorized = raise_unauthorized
     end
 
-    def call(defn, query = nil, policy: nil, record: nil)
+    def call(defn, *args, policy: nil, record: nil)
+      query = args[0] || defn.name
       opts = {record: record,
-              query: query || defn.name,
+              query: query,
               policy: policy,
               raise: raise_unauthorized}
       if query.respond_to?(:call)
