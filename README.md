@@ -65,7 +65,9 @@ class Car < BaseObject
 end
 ```
 
-The above example shows the most basic usage of this gem. The example would use `CarPolicy#trunk?` for authorizing access to the field, passing in the parent object (in this case probably a `Car` model).
+The above example shows the most basic usage of this gem. The example would
+use `CarPolicy#trunk?` for authorizing access to the field, passing in the
+parent object (in this case probably a `Car` model).
 
 ##### Options
 
@@ -79,7 +81,7 @@ Both styles are presented below side by side.
 ###### `authorize` and `authorize!`
 
 To use authorization on a field, you **must** pass either the `authorize` or
-`authorize!` option. Both options will return `nil` for the field, if the
+`authorize!` option. Both options will cause the field to return `nil` if the
 access is unauthorized, but `authorize!` will also add an error message (e.g.
 for usage with mutations).
 
@@ -196,6 +198,10 @@ end
 ```
 
 ### Legacy `define` API
+
+The legacy `define` based API will be supported until it is removed from the
+`graphql` gem (as planned for version 1.10).
+
 #### Add the authorization middleware
 
 Add the following to your GraphQL schema:
