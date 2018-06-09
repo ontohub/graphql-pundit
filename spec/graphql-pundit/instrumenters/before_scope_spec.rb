@@ -40,6 +40,10 @@ class ScopeTestPolicy
   def test?
     nil
   end
+
+  def to_a?
+    nil
+  end
 end
 
 RSpec.describe GraphQL::Pundit::Instrumenters::BeforeScope do

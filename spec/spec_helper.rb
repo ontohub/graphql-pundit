@@ -20,6 +20,8 @@ RSpec.configure do |config|
                                         remainder_mark: '-'}
 end
 
+Field = GraphQL::Pundit::Field
+
 class Test
   def initialize(value)
     @value = value

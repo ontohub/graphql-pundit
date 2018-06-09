@@ -2,8 +2,14 @@ require 'graphql-pundit/instrumenters/authorization'
 
 module GraphQL::Pundit
   module Authorization
-    def initialize(*args, authorize: nil, record: nil, policy: nil, **kwargs, &block)
-      authorize_bang = kwargs.delete(:authorize!) # authorize! is not a valid variable name
+    # rubocop:disable Metrics/ParameterLists
+    def initialize(*args, authorize: nil,
+                          record: nil,
+                          policy: nil,
+                          **kwargs, &block)
+      # rubocop:enable Metrics/ParameterLists
+      # authorize! is not a valid variable name
+      authorize_bang = kwargs.delete(:authorize!)
       @record = record if record
       @policy = policy if policy
       @authorize = authorize_bang || authorize
@@ -34,27 +40,30 @@ module GraphQL::Pundit
     private
 
     def do_authorize(root, arguments, context)
-      case # @authorize can be true, callable or a symbol/string
-      when @authorize.respond_to?(:call)
-        return @authorize.call(root, arguments, context)
-      when @authorize.equal?(true)
-        @authorize = method_sym
-      end
+      return true unless @authorize
+      return @authorize.call(root, arguments, context) if callable?(@authorize)
 
-      case # record can be nil, callable or anything else
-      when @record.respond_to?(:call)
+      # authorize can be callable, true (for inference) or a policy query
+      @authorize = method_sym if @authorize.equal?(true)
+
+      # record can be callable, nil (for inference) or just any other value
+      if callable?(@record)
         @record = @record.call(root, arguments, context)
-      when @record.equal?(nil)
+      elsif @record.equal?(nil)
         @record = root
       end
 
-      case # policy can be nil, callable or a policy class
-      when @policy.respond_to?(:call)
-        @policy = @policy.call(root, arguments, context)
-      when @policy.equal?(nil)
-        @policy = ::Pundit::PolicyFinder.new(@record).policy!()
+      # policy can be callable, nil (for inference) or a policy class
+      if callable?(@policy)
+        @policy = @policy.call(@record, arguments, context)
+      elsif @policy.equal?(nil)
+        @policy = ::Pundit::PolicyFinder.new(@record).policy!
       end
       @policy.new(context[:current_user], @record).public_send(query)
+    end
+
+    def callable?(thing)
+      thing.respond_to?(:call)
     end
 
     def query

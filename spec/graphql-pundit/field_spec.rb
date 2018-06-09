@@ -2,8 +2,6 @@
 
 require 'spec_helper'
 
-Field = GraphQL::Pundit::Field
-
 RSpec.shared_examples 'auth field' do |do_raise|
   before do
     [TestPolicy, AlternativeTestPolicy].each do |policy|
@@ -103,7 +101,6 @@ RSpec.describe GraphQL::Pundit::Field do
                 authorize: (do_raise ? nil : query),
                 record: record,
                 policy: policy,
-                resolve: ->(obj, _, _) { obj.to_s },
                 null: true)
     end
 
@@ -114,7 +111,6 @@ RSpec.describe GraphQL::Pundit::Field do
     let(:field) do
       field = Field.new(name: :to_s,
                         type: String,
-                        resolve: ->(obj, _, _) { obj.to_s },
                         null: true)
       if do_raise
         field.authorize! query, record: record, policy: policy
