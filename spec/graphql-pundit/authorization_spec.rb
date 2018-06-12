@@ -4,14 +4,17 @@ require 'spec_helper'
 
 RSpec.shared_examples 'auth field' do |do_raise|
   before do
-    [TestPolicy, AlternativeTestPolicy].each do |policy|
-      allow_any_instance_of(policy).to receive(:to_s?).and_return(auth_result)
-      allow_any_instance_of(policy).to receive(:test?).and_return(auth_result)
+    [CarPolicy, ChineseCarPolicy].each do |policy|
+      allow_any_instance_of(policy).to receive(:name?).and_return(auth_result)
+      allow_any_instance_of(policy).to(
+        receive(:display_name?).and_return(auth_result)
+      )
     end
   end
 
   context 'authorized' do
     let(:auth_result) { true }
+
     it 'returns the field value' do
       expect(result).to eq(field_value)
     end
@@ -37,11 +40,11 @@ RSpec.shared_examples 'policies' do |do_raise|
     include_examples 'auth field', do_raise
   end
   context 'using a policy proc' do
-    let(:policy) { ->(_, _, _) { AlternativeTestPolicy } }
+    let(:policy) { ->(_, _, _) { ChineseCarPolicy } }
     include_examples 'auth field', do_raise
   end
   context 'using a policy class' do
-    let(:policy) { AlternativeTestPolicy }
+    let(:policy) { ChineseCarPolicy }
     include_examples 'auth field', do_raise
   end
 end
@@ -51,11 +54,11 @@ RSpec.shared_examples 'records' do |do_raise|
     include_examples 'policies', do_raise
   end
   context 'using a record proc' do
-    let(:record) { ->(_, _, _) { Test.new('alternative record') } }
+    let(:record) { ->(_, _, _) { Car.new('Tesla', 'USA') } }
     include_examples 'policies', do_raise
   end
   context 'using an explicit record' do
-    let(:record) { Test.new('alternative record') }
+    let(:record) { Car.new('Tesla', 'USA') }
     include_examples 'policies', do_raise
   end
 end
@@ -65,7 +68,7 @@ RSpec.shared_examples 'queries' do |do_raise|
     include_examples 'records', do_raise
   end
   context 'using an explicit query' do
-    let(:query) { :test }
+    let(:query) { :display_name }
     include_examples 'records', do_raise
   end
   context 'using a proc' do
@@ -86,22 +89,23 @@ RSpec.shared_examples 'auth methods' do
   end
 end
 
-RSpec.describe GraphQL::Pundit::Field do
+RSpec.describe GraphQL::Pundit::Authorization do
   let(:query) { true }
   let(:record) { nil }
   let(:policy) { nil }
-  let(:field_value) { 'pass' }
-  let(:result) { field.resolve_field(Test.new(field_value), {}, {}) }
+  let(:field_value) { Car.first.name }
+  let(:result) { field.resolve(Car.first, {}, {}) }
 
   context 'one-line field definition' do
     let(:field) do
-      Field.new(name: :to_s,
+      Field.new(name: :name,
                 type: String,
                 authorize!: (do_raise ? query : nil),
                 authorize: (do_raise ? nil : query),
                 record: record,
                 policy: policy,
-                null: true)
+                null: true).
+        to_graphql
     end
 
     include_examples 'auth methods'
@@ -109,7 +113,7 @@ RSpec.describe GraphQL::Pundit::Field do
 
   context 'block field definition' do
     let(:field) do
-      field = Field.new(name: :to_s,
+      field = Field.new(name: :name,
                         type: String,
                         null: true)
       if do_raise
@@ -117,7 +121,7 @@ RSpec.describe GraphQL::Pundit::Field do
       else
         field.authorize query, record: record, policy: policy
       end
-      field
+      field.to_graphql
     end
 
     include_examples 'auth methods'

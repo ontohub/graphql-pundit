@@ -2,6 +2,26 @@
 
 require 'spec_helper'
 
+class Test
+  def initialize(value)
+    @value = value
+  end
+
+  def to_s
+    @value.to_s
+  end
+end
+
+class TestPolicy
+  def initialize(_, value)
+    @value = value
+  end
+
+  def test?
+    @value.to_s == 'pass'
+  end
+end
+
 RSpec.shared_examples 'an authorizing field' do |error|
   context 'Authorized' do
     subject { pass_test }

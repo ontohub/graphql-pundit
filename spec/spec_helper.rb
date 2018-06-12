@@ -22,40 +22,130 @@ end
 
 Field = GraphQL::Pundit::Field
 
-class Test
-  def initialize(value)
-    @value = value
+class CarDataset
+  attr_reader :cars
+
+  def initialize(cars)
+    @cars = cars
   end
 
-  def to_s
-    @value.to_s
+  def object
+    self
+  end
+
+  def where(&block)
+    self.class.new(cars.select(&block))
+  end
+
+  def first
+    cars.first
+  end
+
+  def all
+    self
+  end
+
+  def to_a
+    @cars
+  end
+
+  def model
+    Car
   end
 end
 
-class TestPolicy
-  def initialize(_, value)
-    @value = value
+class Car
+  attr_reader :name, :country
+
+  def self.all
+    CarDataset.new(CARS)
   end
 
-  def test?
-    @value.to_s == 'pass'
+  def self.object
+    self
   end
 
-  def to_s?
-    @value.to_s == 'pass'
+  def self.where(&block)
+    all.where(&block)
+  end
+
+  def self.first(&block)
+    where(&block).first
+  end
+
+  def initialize(name, country)
+    @name = name
+    @country = country
+  end
+
+  CARS = [{name: 'Toyota', country: 'Japan'},
+          {name: 'Volkswagen Group', country: 'Germany'},
+          {name: 'Hyundai', country: 'South Korea'},
+          {name: 'General Motors', country: 'USA'},
+          {name: 'Ford', country: 'USA'},
+          {name: 'Nissan', country: 'Japan'},
+          {name: 'Honda', country: 'Japan'},
+          {name: 'Fiat Chrysler', country: 'Italy'},
+          {name: 'Renault', country: 'France'},
+          {name: 'Groupe PSA', country: 'France'},
+          {name: 'Suzuki', country: 'Japan'},
+          {name: 'SAIC', country: 'China'},
+          {name: 'Daimler', country: 'Germany'},
+          {name: 'BMW', country: 'Germany'},
+          {name: 'Changan', country: 'China'},
+          {name: 'Mazda', country: 'Japan'},
+          {name: 'BAIC', country: 'China'},
+          {name: 'Dongfeng Motor', country: 'China'},
+          {name: 'Geely', country: 'China'},
+          {name: 'Great Wall', country: 'China'}].
+    map { |c| Car.new(c[:name], c[:country]) }
+end
+
+class CarPolicy
+  class Scope
+    attr_reader :scope
+    def initialize(_user, scope)
+      @scope = scope
+    end
+
+    def resolve
+      @scope.where { |c| c.country == 'Germany' }
+    end
+  end
+
+  def initialize(_user, car)
+    @car = car
+  end
+
+  def name?
+    false
+  end
+
+  def display_name?
+    false
   end
 end
 
-class AlternativeTestPolicy
-  def initialize(_, value)
-    @value = value
+class ChineseCarPolicy
+  class Scope
+    def initialize(_user, scope)
+      @scope = scope
+    end
+
+    def resolve
+      @scope.where { |c| c.country == 'China' }
+    end
   end
 
-  def test?
-    @value.to_s == 'pass'
+  def initialize(_user, car)
+    @car = car
   end
 
-  def to_s?
-    @value.to_s == 'pass'
+  def name?
+    false
+  end
+
+  def display_name?
+    false
   end
 end
