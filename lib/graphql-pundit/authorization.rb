@@ -1,20 +1,13 @@
 # frozen_string_literal: true
 
+require 'graphql-pundit/common'
+
 module GraphQL
   module Pundit
     # Authorization methods to be included in the used Field class
     module Authorization
-      # Class methods to be included in the Field class
-      module ClassMethods
-        def current_user(current_user = nil)
-          return @current_user unless current_user
-          @current_user = current_user
-        end
-      end
-
       def self.prepended(base)
-        @current_user = :current_user
-        base.extend(ClassMethods)
+        base.include(GraphQL::Pundit::Common)
       end
 
       # rubocop:disable Metrics/ParameterLists
@@ -65,10 +58,6 @@ module GraphQL
         policy.new(context[self.class.current_user], record).public_send query
       end
 
-      def callable?(thing)
-        thing.respond_to?(:call)
-      end
-
       def infer_query(auth_value)
         # authorize can be callable, true (for inference) or a policy query
         query = auth_value.equal?(true) ? method_sym : auth_value
@@ -91,7 +80,8 @@ module GraphQL
         if callable?(policy)
           policy.call(record, arguments, context)
         elsif policy.equal?(nil)
-          ::Pundit::PolicyFinder.new(record).policy!
+          infer_from = model?(record) ? record.model : record
+          ::Pundit::PolicyFinder.new(infer_from).policy!
         else
           policy
         end

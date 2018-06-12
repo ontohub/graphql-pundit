@@ -1,9 +1,15 @@
 # frozen_string_literal: true
 
+require 'graphql-pundit/common'
+
 module GraphQL
   module Pundit
     # Scope methods to be included in the used Field class
     module Scope
+      def self.prepended(base)
+        base.include(GraphQL::Pundit::Common)
+      end
+
       def initialize(*args, before_scope: nil,
                             after_scope: nil,
                             **kwargs, &block)
@@ -34,10 +40,6 @@ module GraphQL
 
         scope = infer_scope(root) if scope.equal?(true)
         scope::Scope.new(context[self.class.current_user], root).resolve
-      end
-
-      def model?(thing)
-        thing.respond_to?(:model)
       end
 
       def infer_scope(root)
