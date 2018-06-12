@@ -62,6 +62,10 @@ Naming/FileName:
     - lib/ontohub-models.rb
     - spec/lib/git-shell_spec.rb
 
+Naming/UncommunicativeMethodParamName:
+  Exclude:
+    - 'spec/**/*'
+
 Style/Documentation:
   Exclude:
     - 'app/indexers/**/*'

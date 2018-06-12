@@ -33,7 +33,9 @@ RSpec.describe GraphQL::Pundit::Scope do
       let(:field) do
         Field.new(name: :to_a,
                   type: String,
-                  before_scope: ->(scope, _args, _ctx) { scope.where { |e| e > 20 } },
+                  before_scope: (lambda do |scope, _args, _ctx|
+                    scope.where { |e| e > 20 }
+                  end),
                   null: true)
       end
 
@@ -91,7 +93,9 @@ RSpec.describe GraphQL::Pundit::Scope do
       let(:field) do
         Field.new(name: :to_a,
                   type: String,
-                  before_scope: ->(scope, _args, _ctx) { scope.where { |e| e > 20 } },
+                  before_scope: (lambda do |scope, _args, _ctx|
+                    scope.where { |e| e > 20 }
+                  end),
                   authorize: true,
                   null: true)
       end
