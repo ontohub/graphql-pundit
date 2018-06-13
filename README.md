@@ -181,6 +181,37 @@ end
 Using `record` can be helpful for e.g. mutations, where you need a value to
 initialize the policy with, but for mutations there is no parent object.
 
+###### `before_scope` and `after_scope`
+
+`before_scope` and `after_scope` can be used to apply Pundit scopes to the
+fields. Both options can be combined freely within one field.
+
+```ruby
+class User < BaseObject
+  # will use the `PostPolicy::Scope` before the resolver
+  field :posts, ..., before_scope: true
+  field :posts, ... do
+    before_scope
+  end
+
+  # will use the passed lambda after the resolver
+  field :comments, ..., after_scope: ->(comments, args, ctx) { ... }
+  field :comments, ... do
+    after_scope ->(comments, args, ctx) { ... }
+  end
+
+  # will use the `FriendPolicy::Scope`
+  field :friends, ..., after_scope: FriendPolicy
+  field :friends, ... do
+    after_scope FriendPolicy
+  end
+end
+```
+
+- `true` will trigger the inference mechanism, where the policy class, which contains the scope class, is inferred based on either the parent object (for `before_scope`) or the result of the resolver (for `after_scope`).
+- a lambda function, that will be called with the parent object (for `before_scope`) or the result of the resolver (for `after_scope`), the field arguments and the context
+- a policy class that contains a `Scope` class (this does not actually have to be a policy class, but could also be a module containing a `Scope` class)
+
 ###### Combining options
 
 All options can be combined with one another (except `authorize` and `authorize!`; please don't do that). Examples:
