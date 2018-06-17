@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-lib = File.expand_path('../lib', __FILE__)
+lib = File.expand_path('lib', __dir__)
 $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 require 'graphql-pundit/version'
 
@@ -22,7 +22,7 @@ Gem::Specification.new do |spec|
   spec.executables   = spec.files.grep(%r{^exe/}) { |f| File.basename(f) }
   spec.require_paths = ['lib']
 
-  spec.add_dependency 'graphql', '>= 1.6.4', '< 1.9.0'
+  spec.add_dependency 'graphql', '>= 1.6.4', '< 1.10.0'
   spec.add_dependency 'pundit', '~> 1.1.0'
 
   spec.add_development_dependency 'bundler', '~> 1.14'
