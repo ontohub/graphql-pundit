@@ -184,7 +184,9 @@ initialize the policy with, but for mutations there is no parent object.
 ###### `before_scope` and `after_scope`
 
 `before_scope` and `after_scope` can be used to apply Pundit scopes to the
-fields. Both options can be combined freely within one field.
+fields. Both options can be combined freely within one field. The result of
+`before_scope` is passed to the resolver as the "parent object", while the
+result of `after_scope` is returned as the result of the field.
 
 ```ruby
 class User < BaseObject
