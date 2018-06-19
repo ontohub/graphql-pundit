@@ -11,7 +11,7 @@
 Add this line to your application's Gemfile:
 
 ```ruby
-gem 'graphql-pundit'
+gem 'graphql-pundit', '~> 0.7.0'
 ```
 
 And then execute:
@@ -163,7 +163,7 @@ class User < BaseObject
                         authorize: true,
                         record: ->(obj, args, ctx) { ctx[:current_user] }
   field :password_hash, ... do
-    authorize policy: ->(obj, args, ctx) { ctx[:current_user] }
+    authorize record: ->(obj, args, ctx) { ctx[:current_user] }
   end
 
   # will use AccountPolicy#email? with the first account as the record (the policy was inferred from the record class)
