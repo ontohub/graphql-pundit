@@ -11,7 +11,7 @@
 Add this line to your application's Gemfile:
 
 ```ruby
-gem 'graphql-pundit'
+gem 'graphql-pundit', '~> 0.7.0'
 ```
 
 And then execute:
@@ -19,6 +19,15 @@ And then execute:
 ```bash
 $ bundle
 ```
+
+### Upgrade Notice
+
+If you're upgrading from an earlier version, make sure to delete your
+`bootsnap` cache, to avoid a load error (see
+[this issue](https://github.com/ontohub/graphql-pundit/issues/51)).
+The cache files are usually located in the `tmp` directory in your
+repository and are named `bootsnap-compile-cache` and
+`bootsnap-load-path-cache`.
 
 ## Usage
 
@@ -163,7 +172,7 @@ class User < BaseObject
                         authorize: true,
                         record: ->(obj, args, ctx) { ctx[:current_user] }
   field :password_hash, ... do
-    authorize policy: ->(obj, args, ctx) { ctx[:current_user] }
+    authorize record: ->(obj, args, ctx) { ctx[:current_user] }
   end
 
   # will use AccountPolicy#email? with the first account as the record (the policy was inferred from the record class)
@@ -184,7 +193,9 @@ initialize the policy with, but for mutations there is no parent object.
 ###### `before_scope` and `after_scope`
 
 `before_scope` and `after_scope` can be used to apply Pundit scopes to the
-fields. Both options can be combined freely within one field.
+fields. Both options can be combined freely within one field. The result of
+`before_scope` is passed to the resolver as the "parent object", while the
+result of `after_scope` is returned as the result of the field.
 
 ```ruby
 class User < BaseObject
