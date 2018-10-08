@@ -27,14 +27,14 @@ module GraphQL
       end
 
       def resolve_field(obj, args, ctx)
-        before_scope_return = apply_scope(@before_scope, obj, args, ctx)
+        before_scope_return = apply_pundit_scope(@before_scope, obj, args, ctx)
         field_return = super(before_scope_return, args, ctx)
-        apply_scope(@after_scope, field_return, args, ctx)
+        apply_pundit_scope(@after_scope, field_return, args, ctx)
       end
 
       private
 
-      def apply_scope(scope, root, arguments, context)
+      def apply_pundit_scope(scope, root, arguments, context)
         return root unless scope
         return scope.call(root, arguments, context) if scope.respond_to?(:call)
 
