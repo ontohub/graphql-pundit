@@ -29,7 +29,7 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'codecov', '~> 0.1.10'
   spec.add_development_dependency 'fuubar', '~> 2.3.0'
   spec.add_development_dependency 'pry', '~> 0.11.0'
-  spec.add_development_dependency 'pry-byebug', '~> 3.6.0'
+  spec.add_development_dependency 'pry-byebug', '~> 3.7.0'
   spec.add_development_dependency 'pry-rescue', '~> 1.4.4'
   spec.add_development_dependency 'pry-stack_explorer', '~> 0.4.9.2'
   spec.add_development_dependency 'rake', '~> 12.0'
