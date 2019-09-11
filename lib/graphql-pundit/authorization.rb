@@ -44,7 +44,9 @@ module GraphQL
           raise GraphQL::ExecutionError, "You're not authorized to do this"
         end
       end
-
+      
+      alias_method :resolve, :resolve_field
+      
       private
 
       def do_authorize(root, arguments, context)
