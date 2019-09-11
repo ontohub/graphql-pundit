@@ -35,7 +35,7 @@ module GraphQL
         @do_raise = true
         authorize(*args, record: record, policy: policy)
       end
-      
+
       def resolve_field(obj, args, ctx)
         raise ::Pundit::NotAuthorizedError unless do_authorize(obj, args, ctx)
 
@@ -55,7 +55,7 @@ module GraphQL
           raise GraphQL::ExecutionError, "You're not authorized to do this"
         end
       end
-      
+
       private
 
       def do_authorize(root, arguments, context)

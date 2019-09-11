@@ -37,7 +37,7 @@ module GraphQL
         field_return = super(before_scope_return, args, ctx)
         apply_scope(@after_scope, field_return, args, ctx)
       end
-      
+
       private
 
       def apply_scope(scope, root, arguments, context)
