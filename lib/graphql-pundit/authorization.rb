@@ -38,15 +38,16 @@ module GraphQL
 
       def resolve_field(obj, args, ctx)
         raise ::Pundit::NotAuthorizedError unless do_authorize(obj, args, ctx)
+
         super(obj, args, ctx)
       rescue ::Pundit::NotAuthorizedError
         if @do_raise
           raise GraphQL::ExecutionError, "You're not authorized to do this"
         end
       end
-      
-      alias_method :resolve, :resolve_field
-      
+
+      alias resolve resolve_field
+
       private
 
       def do_authorize(root, arguments, context)
