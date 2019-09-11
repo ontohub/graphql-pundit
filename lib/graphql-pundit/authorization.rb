@@ -35,7 +35,7 @@ module GraphQL
         @do_raise = true
         authorize(*args, record: record, policy: policy)
       end
-      
+
       def resolve_field(obj, args, ctx)
         resolve_helper(obj, args, ctx) { super(obj, args, ctx) }
       end
@@ -48,6 +48,7 @@ module GraphQL
 
       def resolve_helper(obj, args, ctx)
         raise ::Pundit::NotAuthorizedError unless do_authorize(obj, args, ctx)
+
         yield
       rescue ::Pundit::NotAuthorizedError
         if @do_raise
