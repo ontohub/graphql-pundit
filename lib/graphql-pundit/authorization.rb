@@ -48,6 +48,7 @@ module GraphQL
 
       def resolve_helper(obj, args, ctx)
         raise ::Pundit::NotAuthorizedError unless do_authorize(obj, args, ctx)
+
         yield
       rescue ::Pundit::NotAuthorizedError
         raise_graphql_error if @do_raise
