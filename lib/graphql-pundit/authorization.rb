@@ -48,12 +48,13 @@ module GraphQL
 
       def resolve_helper(obj, args, ctx)
         raise ::Pundit::NotAuthorizedError unless do_authorize(obj, args, ctx)
-
         yield
       rescue ::Pundit::NotAuthorizedError
-        if @do_raise
-          raise GraphQL::ExecutionError, "You're not authorized to do this"
-        end
+        raise_graphql_error if @do_raise
+      end
+
+      def raise_graphql_error
+        raise GraphQL::ExecutionError, "You're not authorized to do this"
       end
 
       def do_authorize(root, arguments, context)
