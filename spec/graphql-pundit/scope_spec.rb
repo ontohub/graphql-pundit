@@ -30,7 +30,8 @@ RSpec.shared_examples 'authorizing scopes' do |with_authorization|
   let(:authorize) { true } if with_authorization
 
   context 'before_scope' do
-    let(:resolve) { ->(cars, _, _) { cars.to_a.map(&:name) } }
+    let(:resolve) { :names }
+
     context 'inferred scope' do
       let(:before_scope) { true }
       let(:expected_result) do
@@ -59,7 +60,7 @@ RSpec.shared_examples 'authorizing scopes' do |with_authorization|
   end
 
   context 'after_scope' do
-    let(:resolve) { ->(scope, _, _) { scope.where { |c| c.name.length > 5 } } }
+    let(:resolve) { :longer_then_five }
 
     context 'inferred scope' do
       let(:scope_class) do
@@ -120,7 +121,7 @@ RSpec.describe GraphQL::Pundit::Scope do
   let(:before_scope) { nil }
   let(:after_scope) { nil }
   let(:authorize) { nil }
-  let(:result) { field.resolve(Car, {}, {}) }
+  let(:result) { field.resolve(Car, {}, spec_context) }
   context 'one-line field definition' do
     let(:field) do
       Field.new(name: :name,
@@ -129,8 +130,7 @@ RSpec.describe GraphQL::Pundit::Scope do
                 before_scope: before_scope,
                 after_scope: after_scope,
                 null: true,
-                resolve: resolve).
-        to_graphql
+                resolver_method: resolve)
     end
 
     context 'with failing authorization' do
@@ -147,10 +147,10 @@ RSpec.describe GraphQL::Pundit::Scope do
                         type: [String],
                         authorize: authorize,
                         null: true,
-                        resolve: resolve)
+                        resolver_method: resolve)
       field.before_scope before_scope
       field.after_scope after_scope
-      field.to_graphql
+      field
     end
 
     context 'with failing authorization' do
