@@ -73,6 +73,7 @@ module GraphQL
           # rubocop:enable Metrics/MethodLength
           scope_metadata = field.metadata[self.class::SCOPE_KEY]
           return field unless scope_metadata
+
           scope = scope_metadata[:proc]
 
           old_resolver = field.resolve_proc

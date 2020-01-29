@@ -35,7 +35,10 @@ class Schema < GraphQL::Schema
 end
 
 def spec_context
-  GraphQL::Query::Context.new(query: Query, schema: Schema, object: {}, values: {})
+  GraphQL::Query::Context.new(query: Query,
+                              schema: Schema,
+                              object: {},
+                              values: {})
 end
 
 class CarDataset
@@ -70,7 +73,7 @@ class CarDataset
   end
 
   def names
-    self.to_a.map(&:name)
+    to_a.map(&:name)
   end
 end
 
@@ -98,7 +101,7 @@ class Car
   end
 
   def self.longer_then_five
-    self.where { |c| c.name.length > 5 }
+    where { |c| c.name.length > 5 }
   end
 
   def initialize(name, country)
