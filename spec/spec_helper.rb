@@ -22,6 +22,25 @@ end
 
 Field = GraphQL::Pundit::Field
 
+class BaseObject < GraphQL::Schema::Object
+  field_class GraphQL::Pundit::Field
+end
+
+class Query < BaseObject
+  field :test, Int, null: true
+end
+
+class Schema < GraphQL::Schema
+  query(Query)
+end
+
+def spec_context
+  GraphQL::Query::Context.new(query: Query,
+                              schema: Schema,
+                              object: {},
+                              values: {})
+end
+
 class CarDataset
   attr_reader :cars
 
@@ -52,6 +71,10 @@ class CarDataset
   def model
     Car
   end
+
+  def names
+    to_a.map(&:name)
+  end
 end
 
 class Car
@@ -71,6 +94,14 @@ class Car
 
   def self.first(&block)
     where(&block).first
+  end
+
+  def object
+    self
+  end
+
+  def self.longer_then_five
+    where { |c| c.name.length > 5 }
   end
 
   def initialize(name, country)

@@ -8,6 +8,7 @@ module GraphQL
       module ClassMethods
         def current_user(current_user = nil)
           return @current_user unless current_user
+
           @current_user = current_user
         end
       end

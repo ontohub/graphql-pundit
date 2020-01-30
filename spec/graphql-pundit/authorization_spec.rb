@@ -94,7 +94,7 @@ RSpec.describe GraphQL::Pundit::Authorization do
   let(:record) { nil }
   let(:policy) { nil }
   let(:field_value) { Car.first.name }
-  let(:result) { field.resolve(Car.first, {}, {}) }
+  let(:result) { field.resolve(Car.first, {}, spec_context) }
 
   context 'one-line field definition' do
     let(:field) do
@@ -104,8 +104,7 @@ RSpec.describe GraphQL::Pundit::Authorization do
                 authorize: (do_raise ? nil : query),
                 record: record,
                 policy: policy,
-                null: true).
-        to_graphql
+                null: true)
     end
 
     include_examples 'auth methods'

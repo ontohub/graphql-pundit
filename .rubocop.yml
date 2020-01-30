@@ -1,6 +1,6 @@
 AllCops:
   TargetRubyVersion: 2.5
-  TargetRailsVersion: 5.1
+  # TargetRailsVersion: 5.1
 
   CacheRootDirectory: /tmp
   AllowSymlinksInCacheRootDirectory: true
@@ -24,7 +24,7 @@ AllCops:
     - 'repos/**/*'
     - 'tmp/**/*'
 
-Layout/AlignParameters:
+Layout/ParameterAlignment:
   Enabled: false
 
 Layout/DotPosition:
@@ -47,7 +47,7 @@ Metrics/BlockLength:
     - 'db/migrate/*'
     - '*.gemspec'
 
-Metrics/LineLength:
+Layout/LineLength:
   Exclude:
     - 'app/graphql/**/*_enum.rb'
     - 'config/initializers/devise.rb'
@@ -62,7 +62,7 @@ Naming/FileName:
     - lib/ontohub-models.rb
     - spec/lib/git-shell_spec.rb
 
-Naming/UncommunicativeMethodParamName:
+Naming/MethodParameterName:
   Exclude:
     - 'spec/**/*'
 

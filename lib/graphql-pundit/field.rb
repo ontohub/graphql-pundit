@@ -5,6 +5,7 @@ require 'graphql-pundit/authorization'
 require 'graphql-pundit/scope'
 
 module GraphQL
+  # Pundit module
   module Pundit
     if defined?(GraphQL::Schema::Field)
       # Field class that contains authorization and scope behavior

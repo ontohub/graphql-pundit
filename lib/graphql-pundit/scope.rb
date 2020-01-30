@@ -32,6 +32,12 @@ module GraphQL
         apply_scope(@after_scope, field_return, args, ctx)
       end
 
+      def resolve(obj, args, ctx)
+        before_scope_return = apply_scope(@before_scope, obj, args, ctx)
+        field_return = super(before_scope_return, args, ctx)
+        apply_scope(@after_scope, field_return, args, ctx)
+      end
+
       private
 
       def apply_scope(scope, root, arguments, context)

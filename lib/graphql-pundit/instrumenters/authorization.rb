@@ -20,6 +20,7 @@ module GraphQL
             unless authorize(root, arguments, context)
               raise ::Pundit::NotAuthorizedError
             end
+
             old_resolver.call(root, arguments, context)
           rescue ::Pundit::NotAuthorizedError
             if options[:raise]
@@ -64,6 +65,7 @@ module GraphQL
 
         def instrument(_type, field)
           return field unless field.metadata[:authorize]
+
           old_resolver = field.resolve_proc
           resolver = AuthorizationResolver.new(current_user,
                                                old_resolver,
